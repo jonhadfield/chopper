@@ -1,4 +1,3 @@
-#include <zlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -39,11 +38,12 @@ int chop(void)
     p = (st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
     int total_lines_scanned = 0, invalid_lines = 0, files_processed = 0;
+    FILE *pRead;
     for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
-	gzFile pRead = gzopen(globalArgs.inputFiles[f_count], "r");
+	pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	char log_line[MAX_LINE_LENGTH];
 	int counter = 0;
-	while (gzgets(pRead, log_line, 8192) != NULL) {
+	while (fgets(log_line, 8192, pRead) != NULL) {
 	    total_lines_scanned++;
 	    if (strlen(log_line) > MAX_LINE_LENGTH - 1) {
 		invalid_lines++;
@@ -86,7 +86,7 @@ int chop(void)
 	    flush_to_mongo(p, counter);
 	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
 	    flush_to_stdout(p, counter);
-	gzclose(pRead);
+	fclose(pRead);
 	files_processed++;
     }
     free(p);
