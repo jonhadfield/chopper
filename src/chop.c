@@ -57,8 +57,9 @@ int chop(void)
 		    invalid_lines++;
 		    continue;
 		}
+        char *f_combined = "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
 		sscanf(log_line,
-		       "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"",
+               f_combined,
 		       p[counter].req_ip, p[counter].req_ident,
 		       p[counter].req_user, p[counter].req_datetime,
 		       p[counter].req_method, p[counter].req_uri,
