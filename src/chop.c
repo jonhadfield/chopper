@@ -45,7 +45,6 @@ int chop(void)
 	int counter = 0;
 	const char *f_combined =
 	    "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
-	const char *f_common = "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s";
 	while (fgets(log_line, 8192, pRead) != NULL) {
 	    total_lines_scanned++;
 	    if (strlen(log_line) > MAX_LINE_LENGTH - 1) {
