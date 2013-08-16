@@ -57,7 +57,8 @@ int chop(void)
 		    invalid_lines++;
 		    continue;
 		}
-        char *f_combined = "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
+        const char *f_combined = "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
+        const char *f_common = "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s";
 		sscanf(log_line,
                f_combined,
 		       p[counter].req_ip, p[counter].req_ident,
