@@ -120,8 +120,13 @@ int flush_to_stdout(st_http_request * p, int counter)
 {
     int flush_count;
     for (flush_count = 0; flush_count < counter; flush_count++) {
-	printf("%s %d %s\n", p[flush_count].req_uri,
-	       p[flush_count].resp_code, p[flush_count].resp_bytes);
+	printf("%s %s %s [%s] \"%s %s %s\" %d %s \"%s\" \"%s\"\n", 
+          p[flush_count].req_ip, p[flush_count].req_ident, 
+          p[flush_count].req_user, p[flush_count].req_datetime, 
+          p[flush_count].req_method, p[flush_count].req_uri,
+	      p[flush_count].req_proto, p[flush_count].resp_code, 
+          p[flush_count].resp_bytes, p[flush_count].req_referer, 
+          p[flush_count].req_agent);
     }
     return (0);
 }
