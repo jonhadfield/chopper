@@ -43,6 +43,8 @@ int chop(void)
 	pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	char log_line[MAX_LINE_LENGTH];
 	int counter = 0;
+	const char *f_combined =
+	    "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
 	while (fgets(log_line, 8192, pRead) != NULL) {
 	    total_lines_scanned++;
 	    if (strlen(log_line) > MAX_LINE_LENGTH - 1) {
@@ -58,7 +60,7 @@ int chop(void)
 		    continue;
 		}
 		sscanf(log_line,
-		       "%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"",
+		       f_combined,
 		       p[counter].req_ip, p[counter].req_ident,
 		       p[counter].req_user, p[counter].req_datetime,
 		       p[counter].req_method, p[counter].req_uri,

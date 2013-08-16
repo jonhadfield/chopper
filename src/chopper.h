@@ -9,7 +9,7 @@
 #define  MAX_RESP_BYTES     20
 #define  MAX_REFERER      2083	//Safe limit?
 #define  MAX_AGENT        1024	//Safe limit?
-#define  BATCH_SIZE       1000
+#define  BATCH_SIZE       5000
 
 typedef struct {
     char req_ip[MAX_IP];
