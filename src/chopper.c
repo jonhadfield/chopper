@@ -158,6 +158,7 @@ main (int argc, char *argv[])
   int total_lines_scanned = 0, invalid_lines = 0, files_processed = 0;
   const char *f_combined =
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
+  char log_line[MAX_LINE_LENGTH];
 
   if (globalArgs.numInputFiles > 0)
     {
@@ -165,7 +166,6 @@ main (int argc, char *argv[])
       for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++)
 	{
 	  pRead = fopen (globalArgs.inputFiles[f_count], "r");
-	  char log_line[MAX_LINE_LENGTH];
 	  int counter = 0;
 	  while (fgets (log_line, 8192, pRead) != NULL)
 	    {
@@ -225,7 +225,6 @@ main (int argc, char *argv[])
     }
   else
     {
-      char log_line[MAX_LINE_LENGTH];
       int counter = 0;
       while (fgets (log_line, 8192, stdin) != NULL)
 	{
