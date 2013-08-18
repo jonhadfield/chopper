@@ -166,6 +166,15 @@ int main(int argc, char *argv[])
 	}
     }
 
+    void call_flush(st_http_request * p, int countval) {
+	if (globalArgs.outFileName != NULL)
+	    flush_to_disk(p, countval);
+	if (globalArgs.host != NULL && globalArgs.collection != NULL)
+	    flush_to_mongo(p, countval);
+	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
+	    flush_to_stdout(p, countval);
+    }
+
     if (globalArgs.numInputFiles > 0) {
 	FILE *pRead;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
@@ -191,26 +200,14 @@ int main(int argc, char *argv[])
 			   p[counter].req_agent);
 		}
 		if (counter + 1 == (use_batch_size)) {
-		    if (globalArgs.outFileName != NULL)
-			flush_to_disk(p, counter + 1);
-		    if (globalArgs.host != NULL
-			&& globalArgs.collection != NULL)
-			flush_to_mongo(p, counter + 1);
-		    if (globalArgs.outFileName == NULL
-			&& globalArgs.host == NULL)
-			flush_to_stdout(p, counter + 1);
+		    call_flush(p, counter + 1);
 		    counter = 0;
 		} else {
 		    counter++;
 		}
 	    }
 
-	    if (globalArgs.outFileName != NULL)
-		flush_to_disk(p, counter);
-	    if (globalArgs.host != NULL && globalArgs.collection != NULL)
-		flush_to_mongo(p, counter);
-	    if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
-		flush_to_stdout(p, counter);
+	    call_flush(p, counter);
 	    fclose(pRead);
 	    files_processed++;
 	}
@@ -236,26 +233,13 @@ int main(int argc, char *argv[])
 		       p[counter].req_agent);
 	    }
 	    if (counter + 1 == (use_batch_size)) {
-		if (globalArgs.outFileName != NULL)
-		    flush_to_disk(p, counter + 1);
-		if (globalArgs.host != NULL
-		    && globalArgs.collection != NULL)
-		    flush_to_mongo(p, counter + 1);
-		if (globalArgs.outFileName == NULL
-		    && globalArgs.host == NULL)
-		    flush_to_stdout(p, counter + 1);
+		call_flush(p, counter + 1);
 		counter = 0;
 	    } else {
 		counter++;
 	    }
 	}
-
-	if (globalArgs.outFileName != NULL)
-	    flush_to_disk(p, counter);
-	if (globalArgs.host != NULL && globalArgs.collection != NULL)
-	    flush_to_mongo(p, counter);
-	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
-	    flush_to_stdout(p, counter);
+	call_flush(p, counter);
     }
     free(p);
     end = clock();
