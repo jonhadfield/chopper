@@ -1,15 +1,17 @@
-#define  MAX_LINE_LENGTH  8192
-#define  MAX_IP             16
-#define  MAX_IDENT           8
-#define  MAX_USER            8
-#define  MAX_DATETIME       27
-#define  MAX_METHOD          8
-#define  MAX_URI          2083	//Safe limit?
-#define  MAX_PROTO           8
-#define  MAX_RESP_BYTES     20
-#define  MAX_REFERER      2083	//Safe limit?
-#define  MAX_AGENT        1024	//Safe limit?
-#define  BATCH_SIZE       5000
+#define  MAX_LINE_LENGTH    8192
+#define  MAX_IP               16
+#define  MAX_IDENT             8
+#define  MAX_USER              8
+#define  MAX_DATETIME         27
+#define  MAX_METHOD            8
+#define  MAX_URI            2038	//Safe limit?
+#define  MAX_PROTO             8
+#define  MAX_RESP_BYTES       20
+#define  MAX_REFERER        2038	//Safe limit?
+#define  MAX_AGENT          1024	//Safe limit?
+
+#define  BATCH_SIZE         20000
+#define  MAX_BSON_SIZE  16777216    //16MB
 
 typedef struct {
     char req_ip[MAX_IP];
