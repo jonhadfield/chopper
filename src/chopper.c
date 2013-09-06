@@ -304,20 +304,14 @@ int main(int argc, char *argv[])
 		    call_flush(p, counter + 1);
 		    counter = 0;
 		} else {
-            if (is_ipv4_address(p[counter].req_ip) && num_spaces(p[counter].req_ident) == 0 && num_spaces(p[counter].req_user) == 0  && num_spaces(p[counter].req_datetime) == 1 && num_spaces(p[counter].req_method) == 0 && num_spaces(p[counter].req_uri) == 0 && num_spaces(p[counter].req_proto) == 0)
+            if (is_ipv4_address(p[counter].req_ip) 
+                && num_spaces(p[counter].req_ident) == 0 
+                && num_spaces(p[counter].req_user) == 0  
+                && num_spaces(p[counter].req_datetime) == 1 
+                && num_spaces(p[counter].req_method) == 0 
+                && num_spaces(p[counter].req_uri) == 0 
+                && num_spaces(p[counter].req_proto) == 0)
             {
-              //printf("req_ip = %s\n",p[counter].req_ip);
-              //printf("req_ip_valid = %d\n",is_ipv4_address(p[counter].req_ip));
-              //printf("req_ident = %s\n",p[counter].req_ident);
-              //printf("req_user = %s\n",p[counter].req_user);
-              //printf("req_datetime = %s\n",p[counter].req_datetime);
-              //printf("req_method = %s\n",p[counter].req_method);
-              //printf("req_uri = %s\n",p[counter].req_uri);
-              //printf("req_proto = %s\n",p[counter].req_proto);
-              //printf("resp_code = %d\n",p[counter].resp_code);
-              //printf("resp_bytes = %s\n",p[counter].resp_bytes);
-              //printf("req_referer = %s\n",p[counter].req_referer);
-              //printf("req_agent = %s\n",p[counter].req_agent);
 		      counter++;
             } else {
               invalid_lines++;
