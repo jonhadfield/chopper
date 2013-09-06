@@ -17,6 +17,7 @@
  * * -p port of db server
  * * -c mongo db and collection
  * * -s search string
+ * * -O outfile name for invalid - write lines that cannot be processed to a file
  * * -v verbose output
  * * additional file names are used as input files
  * *
@@ -30,17 +31,18 @@
  * * --port
  * * --collection
  * * --search_string
+ * * --outfile-invalid
  * * --verbose
  * *
  * */
 
 const char chopper_usage_string[] =
     "chopper [-s|--search_string] [-o|--outfile <path>] [-t|--type] [-b|--batchsize <value>] [-h|--host <value>]\n"
-    "           [-p|--port <value>] [-c|--collection <db.collection>][-s|--search_string <value>] [-v|--verbose]\n"
+    "           [-p|--port <value>] [-c|--collection <db.collection>] [-s|--search_string <value>] [-O|--outfile-invalid] [-v|--verbose]\n"
     "           [-v|--verbose] [-h|--help]\n"
     "           <command> [<args>]";
 
-static const char *optString = "o:t:b:h:p:c:s:v?";
+static const char *optString = "o:t:b:h:p:c:s:O:v?";
 
 static const struct option longOpts[] = {
     {"outFileName", required_argument, NULL, 'o'},
@@ -50,6 +52,8 @@ static const struct option longOpts[] = {
     {"port", required_argument, NULL, 'p'},
     {"collection", required_argument, NULL, 'c'},
     {"search_string", required_argument, NULL, 's'},
+    {"search_string", required_argument, NULL, 's'},
+    {"outFileNameInvalid", required_argument, NULL, 'O'},
     {"verbose", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 'h'},
     {NULL, no_argument, NULL, 0}
@@ -164,6 +168,7 @@ int main(int argc, char *argv[])
     int opt = 0;
     int longIndex = 0;
     globalArgs.outFileName = NULL;
+    globalArgs.outFileNameInvalid = NULL;
     globalArgs.outFile = NULL;
     globalArgs.type = NULL;
     globalArgs.batch_size = NULL;
@@ -198,6 +203,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 's':
 	    globalArgs.search_string = optarg;
+	    break;
+	case 'O':
+	    globalArgs.outFileNameInvalid = optarg;
 	    break;
 	case 'v':
 	    globalArgs.verbose = 1;

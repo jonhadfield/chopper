@@ -30,15 +30,16 @@ typedef struct {
 struct globalArgs_t {
     const char *outFileName;	/* -o option */
     FILE *outFile;
-    char *type;			/* -t option */
-    char *batch_size;		/* -b option */
-    char *host;			/* -h option */
-    int port;			/* -p option */
-    char *collection;		/* -c option */
-    char *search_string;	/* -s option */
-    int verbose;		/* verbosity */
-    char **inputFiles;		/* input files */
-    int numInputFiles;		/* # of input files */
+    char *type;			        /* -t option */
+    char *batch_size;		    /* -b option */
+    char *host;			        /* -h option */
+    int port;			        /* -p option */
+    char *collection;		    /* -c option */
+    char *search_string;	    /* -s option */
+    char *outFileNameInvalid;	/* -O option */
+    int verbose;		        /* verbosity */
+    char **inputFiles;		    /* input files */
+    int numInputFiles;		    /* # of input files */
 } globalArgs;
 
 int flush_to_disk(st_http_request *, int);
