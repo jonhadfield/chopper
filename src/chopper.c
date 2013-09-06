@@ -229,14 +229,14 @@ int main(int argc, char *argv[])
     } else {
 	use_batch_size = BATCH_SIZE;
     }
-    fprintf(stderr, "\n_____ Summary _____\n\n");
-    fprintf(stderr, "using batch size: %d\n", use_batch_size);
-    fprintf(stderr, "Size of st_http_request: %lu\n",
-	    sizeof(st_http_request));
-    fprintf(stderr, "Total mem = %lu\n",
-	    use_batch_size * sizeof(st_http_request));
-    fprintf(stderr, "Total mem in MB = %lu\n",
-	    use_batch_size * sizeof(st_http_request) / 1024 / 1024);
+    //fprintf(stderr, "\n_____ Summary _____\n\n");
+    //fprintf(stderr, "using batch size: %d\n", use_batch_size);
+    //fprintf(stderr, "Size of st_http_request: %lu\n",
+	//    sizeof(st_http_request));
+    //fprintf(stderr, "Total mem = %lu\n",
+	//    use_batch_size * sizeof(st_http_request));
+    //fprintf(stderr, "Total mem in MB = %lu\n",
+	//    use_batch_size * sizeof(st_http_request) / 1024 / 1024);
     tmp =
 	(st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
@@ -256,7 +256,6 @@ int main(int argc, char *argv[])
     char log_line[MAX_LINE_LENGTH];
 
     int isValid(char *log_line) {
-    //printf("Valid: %d %s\n",is_utf8(log_line),log_line);
 	if (is_utf8(log_line) != 1 || log_line == NULL || strlen(log_line) <= 1
 	    || log_line[0] == '\0'
 	    || strlen(log_line) > MAX_LINE_LENGTH - 1) {
