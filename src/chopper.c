@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
     }
     p = (st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
-    int total_lines_scanned = 0, invalid_lines = 0, files_processed = 0;
+    int total_lines_scanned = 0, invalid_lines = 0, invalid_req_ip = 0, invalid_req_ident = 0, invalid_req_user = 0, invalid_req_datetime = 0, invalid_req_method = 0, invalid_req_uri = 0, invalid_req_proto = 0, invalid_resp_code = 0, invalid_resp_bytes = 0, invalid_req_referer = 0, invalid_req_agent = 0, files_processed = 0;
     const char *f_combined =
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
     char log_line[MAX_LINE_LENGTH];
@@ -304,18 +304,49 @@ int main(int argc, char *argv[])
 		    call_flush(p, counter + 1);
 		    counter = 0;
 		} else {
-            if (is_ipv4_address(p[counter].req_ip) 
-                && num_spaces(p[counter].req_ident) == 0 
-                && num_spaces(p[counter].req_user) == 0  
-                && num_spaces(p[counter].req_datetime) == 1 
-                && num_spaces(p[counter].req_method) == 0 
-                && num_spaces(p[counter].req_uri) == 0 
-                && num_spaces(p[counter].req_proto) == 0)
-            {
-		      counter++;
-            } else {
+            
+            _Bool invalid = 0;
+            if (is_ipv4_address(p[counter].req_ip) == 0){
+                invalid_req_ip++;            
+                invalid = 1;
+                printf("bad ip");
+            }
+            if (num_spaces(p[counter].req_ident) > 0){
+                invalid_req_ident++;            
+                invalid = 1;
+                printf("bad ident");
+            }
+            if (num_spaces(p[counter].req_user) > 0){
+                invalid_req_user++;            
+                invalid = 1;
+                printf("bad user: -%s-",p[counter].req_user);
+            }
+            if (num_spaces(p[counter].req_datetime) != 1){
+                invalid_req_datetime++;            
+                invalid = 1;
+                printf("bad datetime");
+            }
+            if (num_spaces(p[counter].req_method) > 0){
+                invalid_req_method++;            
+                invalid = 1;
+                printf("bad method");
+            }
+            if (num_spaces(p[counter].req_uri) > 0){
+                invalid_req_uri++;            
+                invalid = 1;
+                printf("bad uri");
+            }
+            if (num_spaces(p[counter].req_proto) > 0){
+                invalid_req_proto++;            
+                invalid = 1;
+                printf("bad proto");
+            }
+
+            if(invalid){
               invalid_lines++;
               printf("---INVALID LINE---\n%s\n",log_line);
+            }else{
+		      counter++;
             }
 		}
 	    }
