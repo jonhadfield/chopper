@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 
             if(invalid){
               invalid_lines++;
-              printf("---INVALID LINE---\n%s\n",log_line);
+              //printf("---INVALID LINE---\n%s\n",log_line);
             }else{
 		      counter++;
             }
