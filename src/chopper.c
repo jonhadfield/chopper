@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
+#include <arpa/inet.h>
 #include "mongo.h"
 #include "chopper.h"
 
@@ -58,6 +59,104 @@ void display_usage(void)
 {
     puts(chopper_usage_string);
     exit(EXIT_FAILURE);
+}
+
+_Bool is_ipv4_address(char *ipAddress)
+{
+    struct sockaddr_in sa;
+    int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
+    return result != 0;
+}
+
+size_t num_spaces(char *string)
+{
+    size_t s_length = strlen(string);
+    size_t i = 0;
+    size_t space_count = 0;
+    while( i < s_length)  {
+        if(string[i++] == ' ')
+        space_count++; 
+    }
+    return space_count;
+}
+
+_Bool is_utf8(const char * string)
+{
+    if(!string)
+        return 0;
+
+    const unsigned char * bytes = (const unsigned char *)string;
+    while(*bytes)
+    {
+        if( (// ASCII
+             // use bytes[0] <= 0x7F to allow ASCII control characters
+                bytes[0] == 0x09 ||
+                bytes[0] == 0x0A ||
+                bytes[0] == 0x0D ||
+                (0x20 <= bytes[0] && bytes[0] <= 0x7E)
+            )
+        ) {
+            bytes += 1;
+            continue;
+        }
+
+        if( (// non-overlong 2-byte
+                (0xC2 <= bytes[0] && bytes[0] <= 0xDF) &&
+                (0x80 <= bytes[1] && bytes[1] <= 0xBF)
+            )
+        ) {
+            bytes += 2;
+            continue;
+        }
+
+        if( (// excluding overlongs
+                bytes[0] == 0xE0 &&
+                (0xA0 <= bytes[1] && bytes[1] <= 0xBF) &&
+                (0x80 <= bytes[2] && bytes[2] <= 0xBF)
+            ) ||
+            (// straight 3-byte
+                ((0xE1 <= bytes[0] && bytes[0] <= 0xEC) ||
+                    bytes[0] == 0xEE ||
+                    bytes[0] == 0xEF) &&
+                (0x80 <= bytes[1] && bytes[1] <= 0xBF) &&
+                (0x80 <= bytes[2] && bytes[2] <= 0xBF)
+            ) ||
+            (// excluding surrogates
+                bytes[0] == 0xED &&
+                (0x80 <= bytes[1] && bytes[1] <= 0x9F) &&
+                (0x80 <= bytes[2] && bytes[2] <= 0xBF)
+            )
+        ) {
+            bytes += 3;
+            continue;
+        }
+
+        if( (// planes 1-3
+                bytes[0] == 0xF0 &&
+                (0x90 <= bytes[1] && bytes[1] <= 0xBF) &&
+                (0x80 <= bytes[2] && bytes[2] <= 0xBF) &&
+                (0x80 <= bytes[3] && bytes[3] <= 0xBF)
+            ) ||
+            (// planes 4-15
+                (0xF1 <= bytes[0] && bytes[0] <= 0xF3) &&
+                (0x80 <= bytes[1] && bytes[1] <= 0xBF) &&
+                (0x80 <= bytes[2] && bytes[2] <= 0xBF) &&
+                (0x80 <= bytes[3] && bytes[3] <= 0xBF)
+            ) ||
+            (// plane 16
+                bytes[0] == 0xF4 &&
+                (0x80 <= bytes[1] && bytes[1] <= 0x8F) &&
+                (0x80 <= bytes[2] && bytes[2] <= 0xBF) &&
+                (0x80 <= bytes[3] && bytes[3] <= 0xBF)
+            )
+        ) {
+            bytes += 4;
+            continue;
+        }
+
+        return 0;
+    }
+    return 1;
 }
 
 int main(int argc, char *argv[])
@@ -157,9 +256,11 @@ int main(int argc, char *argv[])
     char log_line[MAX_LINE_LENGTH];
 
     int isValid(char *log_line) {
-	if (log_line == NULL || strlen(log_line) <= 1
+    //printf("Valid: %d %s\n",is_utf8(log_line),log_line);
+	if (is_utf8(log_line) != 1 || log_line == NULL || strlen(log_line) <= 1
 	    || log_line[0] == '\0'
 	    || strlen(log_line) > MAX_LINE_LENGTH - 1) {
+        printf("This line is invalid: %s\n", log_line);
 	    return (1);
 	} else {
 	    return (0);
@@ -203,10 +304,28 @@ int main(int argc, char *argv[])
 		    call_flush(p, counter + 1);
 		    counter = 0;
 		} else {
-		    counter++;
+            if (is_ipv4_address(p[counter].req_ip) && num_spaces(p[counter].req_ident) == 0 && num_spaces(p[counter].req_user) == 0  && num_spaces(p[counter].req_datetime) == 1 && num_spaces(p[counter].req_method) == 0 && num_spaces(p[counter].req_uri) == 0 && num_spaces(p[counter].req_proto) == 0)
+            {
+              //printf("req_ip = %s\n",p[counter].req_ip);
+              //printf("req_ip_valid = %d\n",is_ipv4_address(p[counter].req_ip));
+              //printf("req_ident = %s\n",p[counter].req_ident);
+              //printf("req_user = %s\n",p[counter].req_user);
+              //printf("req_datetime = %s\n",p[counter].req_datetime);
+              //printf("req_method = %s\n",p[counter].req_method);
+              //printf("req_uri = %s\n",p[counter].req_uri);
+              //printf("req_proto = %s\n",p[counter].req_proto);
+              //printf("resp_code = %d\n",p[counter].resp_code);
+              //printf("resp_bytes = %s\n",p[counter].resp_bytes);
+              //printf("req_referer = %s\n",p[counter].req_referer);
+              //printf("req_agent = %s\n",p[counter].req_agent);
+		      counter++;
+            } else {
+              invalid_lines++;
+              printf("---INVALID LINE---\n%s\n",log_line);
+            }
 		}
 	    }
-
+        // call if counter > 0?
 	    call_flush(p, counter);
 	    fclose(pRead);
 	    files_processed++;
