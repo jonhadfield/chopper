@@ -52,7 +52,6 @@ static const struct option longOpts[] = {
     {"port", required_argument, NULL, 'p'},
     {"collection", required_argument, NULL, 'c'},
     {"search_string", required_argument, NULL, 's'},
-    {"search_string", required_argument, NULL, 's'},
     {"outFileNameInvalid", required_argument, NULL, 'O'},
     {"verbose", no_argument, NULL, 'v'},
     {"help", no_argument, NULL, 'h'},
@@ -258,7 +257,12 @@ int main(int argc, char *argv[])
     }
     p = (st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
-    int total_lines_scanned = 0, invalid_lines = 0, files_processed = 0;
+
+    char **invalidLines;
+    invalidLines = malloc((use_batch_size/100) * MAX_LINE_LENGTH); 
+    size_t invalidLinesCount = 0;
+
+    int total_lines_scanned = 0, files_processed = 0;
     const char *f_combined =
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
     char log_line[MAX_LINE_LENGTH];
@@ -272,6 +276,12 @@ int main(int argc, char *argv[])
 	} else {
 	    return (0);
 	}
+    }
+
+    void process_invalid(char *log_line) {
+        invalidLines[invalidLinesCount] = log_line;
+        printf("%zu. %s\n",invalidLinesCount, invalidLines[invalidLinesCount]);
+        invalidLinesCount++;
     }
 
     void call_flush(st_http_request * p, int countval) {
@@ -291,7 +301,7 @@ int main(int argc, char *argv[])
 	    while (fgets(log_line, 8192, pRead) != NULL) {
 		total_lines_scanned++;
 		if (isValid(log_line)) {
-		    invalid_lines++;
+            process_invalid(log_line);
 		    continue;
 		} else {
 		    if ((globalArgs.search_string != NULL)
@@ -336,8 +346,7 @@ int main(int argc, char *argv[])
             }
 
             if(invalid){
-              invalid_lines++;
-              //printf("---INVALID LINE---\n%s\n",log_line);
+              process_invalid(log_line);
             }else{
 		      counter++;
             }
@@ -353,7 +362,7 @@ int main(int argc, char *argv[])
 	while (fgets(log_line, 8192, stdin) != NULL) {
 	    total_lines_scanned++;
 	    if (isValid(log_line)) {
-		invalid_lines++;
+        process_invalid(log_line);
 		continue;
 	    } else {
 		if ((globalArgs.search_string != NULL)
@@ -384,9 +393,9 @@ int main(int argc, char *argv[])
     fprintf(stderr, "\n_____ Summary _____\n\n");
     fprintf(stderr, "Files read:\t%d\n", files_processed);
     fprintf(stderr, "Lines read:\t%d\n", total_lines_scanned);
-    fprintf(stderr, "   valid:\t%d\n",
-	    total_lines_scanned - invalid_lines);
-    fprintf(stderr, "   invalid:\t%d\n", invalid_lines);
+    fprintf(stderr, "   valid:\t%zu\n",
+	    total_lines_scanned - invalidLinesCount);
+    fprintf(stderr, "   invalid:\t%zu\n", invalidLinesCount);
     fprintf(stderr, "Batch size:\t%d\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
     fprintf(stderr, "Output file:\t%s\n", globalArgs.outFileName);
@@ -394,5 +403,12 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Port:\t%d\n", globalArgs.port);
     fprintf(stderr, "Collection:\t%s\n", globalArgs.collection);
     fprintf(stderr, "Time taken:\t%5.2fs\n", cpu_time_used);
+
+    //printf("invalidLinesCount: %zu\n", invalidLinesCount);
+    //int index_inv = 0;
+    //for (index_inv = 0; index_inv < invalidLinesCount; index_inv++)
+    //{
+    //    printf("invalid line: %s\n", invalidLines[index_inv]);
+    //}
     exit(0);
 }
