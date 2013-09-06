@@ -1,7 +1,7 @@
 #define  MAX_LINE_LENGTH    8192
 #define  MAX_IP               16
-#define  MAX_IDENT             8
-#define  MAX_USER              8
+#define  MAX_IDENT           513 
+#define  MAX_USER            513
 #define  MAX_DATETIME         27
 #define  MAX_METHOD            8
 #define  MAX_URI            2038	//Safe limit?
