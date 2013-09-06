@@ -20,9 +20,6 @@ int flush_to_disk(st_http_request * p, int counter)
 
 int flush_to_mongo(st_http_request * p, int counter)
 {
-    printf("counter = %d\n",counter);
-    printf("size of data passed to flush = %lu\n",counter * sizeof(*p));
-
     mongo conn;
     mongo_init( &conn );
     mongo_set_op_timeout( &conn, 10000);
@@ -88,7 +85,6 @@ int flush_to_mongo(st_http_request * p, int counter)
 
     bson **bps;
     bps = (bson **) malloc(sizeof(bson *) * counter);
-    printf("bson pointer *bps: %lu\n",sizeof(**bps));
 
     int i = 0;
     for (i = 0; i < counter; i++) {
@@ -111,10 +107,6 @@ int flush_to_mongo(st_http_request * p, int counter)
     }
     mongo_insert_batch(&conn, globalArgs.collection, (const bson **) bps,
 		       counter, 0, MONGO_CONTINUE_ON_ERROR);
-    printf("Total docs: %d\n", counter);
-    printf("Batch inserting %d documents\n",counter);
-    printf("bytes: %lu\n", i+1 * sizeof(bson));
-    fprintf(stderr, "error before conn closed = %d\n", conn.err);
 
     mongo_destroy(&conn);
 
