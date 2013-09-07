@@ -259,8 +259,9 @@ int main(int argc, char *argv[])
 				   sizeof(st_http_request));
 
     char **invalidLines;
-    invalidLines = malloc((use_batch_size/100) * MAX_LINE_LENGTH); 
+    invalidLines = malloc(100 * MAX_LINE_LENGTH); 
     size_t invalidLinesCount = 0;
+    size_t invalidLinesBatchCount = 0;
 
     int total_lines_scanned = 0, files_processed = 0;
     const char *f_combined =
@@ -278,10 +279,20 @@ int main(int argc, char *argv[])
 	}
     }
 
-    void process_invalid(char *log_line) {
-        invalidLines[invalidLinesCount] = log_line;
-        printf("%zu. %s\n",invalidLinesCount, invalidLines[invalidLinesCount]);
-        invalidLinesCount++;
+    void process_invalid(char *log_line, _Bool final) {
+        if (final == 0){
+            invalidLines[invalidLinesCount] = log_line;
+            invalidLinesCount++;
+            invalidLinesBatchCount++;
+        }
+        if (invalidLinesBatchCount % 99 == 0 || final)
+        {
+            size_t index = 0;
+            for (index = 0; index < invalidLinesBatchCount; index++){
+                printf("%zu. %s\n", index, invalidLines[index]);
+            }
+            invalidLinesBatchCount = 0;
+        }
     }
 
     void call_flush(st_http_request * p, int countval) {
@@ -301,7 +312,7 @@ int main(int argc, char *argv[])
 	    while (fgets(log_line, 8192, pRead) != NULL) {
 		total_lines_scanned++;
 		if (isValid(log_line)) {
-            process_invalid(log_line);
+            process_invalid(log_line,0);
 		    continue;
 		} else {
 		    if ((globalArgs.search_string != NULL)
@@ -346,7 +357,7 @@ int main(int argc, char *argv[])
             }
 
             if(invalid){
-              process_invalid(log_line);
+              process_invalid(log_line,0);
             }else{
 		      counter++;
             }
@@ -354,6 +365,7 @@ int main(int argc, char *argv[])
 	    }
         // call if counter > 0?
 	    call_flush(p, counter);
+        process_invalid(NULL,1);
 	    fclose(pRead);
 	    files_processed++;
 	}
@@ -362,7 +374,7 @@ int main(int argc, char *argv[])
 	while (fgets(log_line, 8192, stdin) != NULL) {
 	    total_lines_scanned++;
 	    if (isValid(log_line)) {
-        process_invalid(log_line);
+        process_invalid(log_line,0);
 		continue;
 	    } else {
 		if ((globalArgs.search_string != NULL)
