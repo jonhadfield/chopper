@@ -285,12 +285,18 @@ int main(int argc, char *argv[])
             invalidLinesCount++;
             invalidLinesBatchCount++;
         }
-        if (invalidLinesBatchCount % 99 == 0 || final)
+        if (globalArgs.outFileNameInvalid && (invalidLinesBatchCount % 99 == 0 || final))
         {
-            size_t index = 0;
-            for (index = 0; index < invalidLinesBatchCount; index++){
-                printf("%zu. %s\n", index, invalidLines[index]);
+	        FILE *pWriteInvalid;
+	        pWriteInvalid = fopen(globalArgs.outFileNameInvalid, "a");
+            if (pWriteInvalid != NULL){
+                size_t index = 0;
+                for (index = 0; index < invalidLinesBatchCount; index++){
+                    printf("%zu. %s\n", index, invalidLines[index]);
+                    fputs(invalidLines[index], pWriteInvalid);
+                }
             }
+            fclose(pWriteInvalid);
             invalidLinesBatchCount = 0;
         }
     }
@@ -400,6 +406,8 @@ int main(int argc, char *argv[])
 	call_flush(p, counter);
     }
     free(p);
+    free(invalidLines);
+    invalidLines = 0;
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     fprintf(stderr, "\n_____ Summary _____\n\n");
