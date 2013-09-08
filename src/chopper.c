@@ -64,103 +64,42 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-_Bool is_ipv4_address(char *ipAddress)
-{
-    struct sockaddr_in sa;
-    int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
-    return result != 0;
-}
-
-size_t num_spaces(char *string)
-{
-    size_t s_length = strlen(string);
-    size_t i = 0;
-    size_t space_count = 0;
-    while( i < s_length)  {
-        if(string[i++] == ' ')
-        space_count++; 
-    }
-    return space_count;
-}
-
-_Bool is_utf8(const char * string)
-{
-    if(!string)
-        return 0;
-
-    const unsigned char * bytes = (const unsigned char *)string;
-    while(*bytes)
+void flush_invalid(char invalid_lines[][MAX_LINE_LENGTH], int flush_size) {
+    printf("\n--- in flush_invalid ---\n");
+    //printf("total_lines_invalid = %d\n", total_lines_invalid);
+    printf("flush_size = %d\n", flush_size);
+    if (globalArgs.outFileNameInvalid)
     {
-        if( (// ASCII
-             // use bytes[0] <= 0x7F to allow ASCII control characters
-                bytes[0] == 0x09 ||
-                bytes[0] == 0x0A ||
-                bytes[0] == 0x0D ||
-                (0x20 <= bytes[0] && bytes[0] <= 0x7E)
-            )
-        ) {
-            bytes += 1;
-            continue;
+        FILE *pWriteInvalid;
+        pWriteInvalid = fopen(globalArgs.outFileNameInvalid, "a");
+        if (pWriteInvalid != NULL){
+            //int loop_start = total_lines_invalid - (flush_size);
+            int loop_start = 0;
+            printf("loop_start = %d\n", loop_start);
+            //size_t loop_end = loop_start + flush_size;
+            //int loop_end = total_lines_invalid;
+            int loop_end = flush_size;
+            printf("loop_end = %d\n", loop_end);
+            int index;
+            for (index = loop_start; index < flush_size; index++){
+                //printf("index: %d\n", index);
+                printf("at index %d writing line... %s\n", index, invalid_lines[index]);
+                fputs(invalid_lines[index], pWriteInvalid);
+            }
         }
-
-        if( (// non-overlong 2-byte
-                (0xC2 <= bytes[0] && bytes[0] <= 0xDF) &&
-                (0x80 <= bytes[1] && bytes[1] <= 0xBF)
-            )
-        ) {
-            bytes += 2;
-            continue;
-        }
-
-        if( (// excluding overlongs
-                bytes[0] == 0xE0 &&
-                (0xA0 <= bytes[1] && bytes[1] <= 0xBF) &&
-                (0x80 <= bytes[2] && bytes[2] <= 0xBF)
-            ) ||
-            (// straight 3-byte
-                ((0xE1 <= bytes[0] && bytes[0] <= 0xEC) ||
-                    bytes[0] == 0xEE ||
-                    bytes[0] == 0xEF) &&
-                (0x80 <= bytes[1] && bytes[1] <= 0xBF) &&
-                (0x80 <= bytes[2] && bytes[2] <= 0xBF)
-            ) ||
-            (// excluding surrogates
-                bytes[0] == 0xED &&
-                (0x80 <= bytes[1] && bytes[1] <= 0x9F) &&
-                (0x80 <= bytes[2] && bytes[2] <= 0xBF)
-            )
-        ) {
-            bytes += 3;
-            continue;
-        }
-
-        if( (// planes 1-3
-                bytes[0] == 0xF0 &&
-                (0x90 <= bytes[1] && bytes[1] <= 0xBF) &&
-                (0x80 <= bytes[2] && bytes[2] <= 0xBF) &&
-                (0x80 <= bytes[3] && bytes[3] <= 0xBF)
-            ) ||
-            (// planes 4-15
-                (0xF1 <= bytes[0] && bytes[0] <= 0xF3) &&
-                (0x80 <= bytes[1] && bytes[1] <= 0xBF) &&
-                (0x80 <= bytes[2] && bytes[2] <= 0xBF) &&
-                (0x80 <= bytes[3] && bytes[3] <= 0xBF)
-            ) ||
-            (// plane 16
-                bytes[0] == 0xF4 &&
-                (0x80 <= bytes[1] && bytes[1] <= 0x8F) &&
-                (0x80 <= bytes[2] && bytes[2] <= 0xBF) &&
-                (0x80 <= bytes[3] && bytes[3] <= 0xBF)
-            )
-        ) {
-            bytes += 4;
-            continue;
-        }
-
-        return 0;
+        fclose(pWriteInvalid);
+        printf("closed file for writing\n------------\n");
     }
-    return 1;
 }
+void call_flush(st_http_request * p, int countval) {
+	if (globalArgs.outFileName != NULL)
+	    flush_to_disk(p, countval);
+	if (globalArgs.host != NULL && globalArgs.collection != NULL)
+	    flush_to_mongo(p, countval);
+	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
+	    flush_to_stdout(p, countval);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -230,12 +169,12 @@ int main(int argc, char *argv[])
     start = clock();
     int f_count;
     st_http_request *p, *tmp;
-    int use_batch_size;
-    if (globalArgs.batch_size != '\0') {
-	use_batch_size = atoi(globalArgs.batch_size);
-    } else {
-	use_batch_size = BATCH_SIZE;
-    }
+    //int use_batch_size;
+    //if (globalArgs.batch_size != '\0') {
+	//use_batch_size = atoi(globalArgs.batch_size);
+    //} else {
+	//use_batch_size = BATCH_SIZE;
+    //}
     //fprintf(stderr, "\n_____ Summary _____\n\n");
     //fprintf(stderr, "using batch size: %d\n", use_batch_size);
     //fprintf(stderr, "Size of st_http_request: %lu\n",
@@ -244,6 +183,11 @@ int main(int argc, char *argv[])
 	//    use_batch_size * sizeof(st_http_request));
     //fprintf(stderr, "Total mem in MB = %lu\n",
 	//    use_batch_size * sizeof(st_http_request) / 1024 / 1024);
+    
+    const char *f_combined =
+	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
+    int use_batch_size = BATCH_SIZE;
+
     tmp =
 	(st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
@@ -258,57 +202,12 @@ int main(int argc, char *argv[])
     p = (st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
 
-    char **invalidLines;
-    invalidLines = malloc(100 * MAX_LINE_LENGTH); 
-    size_t invalidLinesCount = 0;
-    size_t invalidLinesBatchCount = 0;
-
+    int use_invalid_batch_size = 5;
+    int invalid_batch_counter = 0;
+    int total_lines_invalid = 0;
+    char pinvalid_lines[use_invalid_batch_size][MAX_LINE_LENGTH];
     int total_lines_scanned = 0, files_processed = 0;
-    const char *f_combined =
-	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
     char log_line[MAX_LINE_LENGTH];
-
-    int isValid(char *log_line) {
-	if (is_utf8(log_line) != 1 || log_line == NULL || strlen(log_line) <= 1
-	    || log_line[0] == '\0'
-	    || strlen(log_line) > MAX_LINE_LENGTH - 1) {
-        printf("This line is invalid: %s\n", log_line);
-	    return (1);
-	} else {
-	    return (0);
-	}
-    }
-
-    void process_invalid(char *log_line, _Bool final) {
-        if (final == 0){
-            invalidLines[invalidLinesCount] = log_line;
-            invalidLinesCount++;
-            invalidLinesBatchCount++;
-        }
-        if (globalArgs.outFileNameInvalid && (invalidLinesBatchCount % 99 == 0 || final))
-        {
-	        FILE *pWriteInvalid;
-	        pWriteInvalid = fopen(globalArgs.outFileNameInvalid, "a");
-            if (pWriteInvalid != NULL){
-                size_t index = 0;
-                for (index = 0; index < invalidLinesBatchCount; index++){
-                    printf("%zu. %s\n", index, invalidLines[index]);
-                    fputs(invalidLines[index], pWriteInvalid);
-                }
-            }
-            fclose(pWriteInvalid);
-            invalidLinesBatchCount = 0;
-        }
-    }
-
-    void call_flush(st_http_request * p, int countval) {
-	if (globalArgs.outFileName != NULL)
-	    flush_to_disk(p, countval);
-	if (globalArgs.host != NULL && globalArgs.collection != NULL)
-	    flush_to_mongo(p, countval);
-	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
-	    flush_to_stdout(p, countval);
-    }
 
     if (globalArgs.numInputFiles > 0) {
 	FILE *pRead;
@@ -316,78 +215,9 @@ int main(int argc, char *argv[])
 	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	    int counter = 0;
 	    while (fgets(log_line, 8192, pRead) != NULL) {
-		total_lines_scanned++;
-		if (isValid(log_line)) {
-            process_invalid(log_line,0);
-		    continue;
-		} else {
-		    if ((globalArgs.search_string != NULL)
-			&& (strstr(log_line, globalArgs.search_string) ==
-			    NULL))
-			continue;
+		    total_lines_scanned++;
+		    if ((globalArgs.search_string != NULL) && (strstr(log_line, globalArgs.search_string) == NULL)) continue;
 		    sscanf(log_line,
-			   f_combined,
-			   p[counter].req_ip, p[counter].req_ident,
-			   p[counter].req_user, p[counter].req_datetime,
-			   p[counter].req_method, p[counter].req_uri,
-			   p[counter].req_proto, &p[counter].resp_code,
-			   p[counter].resp_bytes, p[counter].req_referer,
-			   p[counter].req_agent);
-		}
-		if (counter + 1 == (use_batch_size)) {
-		    call_flush(p, counter + 1);
-		    counter = 0;
-		} else {
-            
-            _Bool invalid = 0;
-            if (is_ipv4_address(p[counter].req_ip) == 0){
-                invalid = 1;
-            }
-            if (num_spaces(p[counter].req_ident) > 0){
-                invalid = 1;
-            }
-            if (num_spaces(p[counter].req_user) > 0){
-                invalid = 1;
-            }
-            if (num_spaces(p[counter].req_datetime) != 1){
-                invalid = 1;
-            }
-            if (num_spaces(p[counter].req_method) > 0){
-                invalid = 1;
-            }
-            if (num_spaces(p[counter].req_uri) > 0){
-                invalid = 1;
-            }
-            if (num_spaces(p[counter].req_proto) > 0){
-                invalid = 1;
-            }
-
-            if(invalid){
-              process_invalid(log_line,0);
-            }else{
-		      counter++;
-            }
-		}
-	    }
-        // call if counter > 0?
-	    call_flush(p, counter);
-        process_invalid(NULL,1);
-	    fclose(pRead);
-	    files_processed++;
-	}
-    } else {
-	int counter = 0;
-	while (fgets(log_line, 8192, stdin) != NULL) {
-	    total_lines_scanned++;
-	    if (isValid(log_line)) {
-        process_invalid(log_line,0);
-		continue;
-	    } else {
-		if ((globalArgs.search_string != NULL)
-		    && (strstr(log_line, globalArgs.search_string) ==
-			NULL))
-		    continue;
-		sscanf(log_line,
 		       f_combined,
 		       p[counter].req_ip, p[counter].req_ident,
 		       p[counter].req_user, p[counter].req_datetime,
@@ -395,27 +225,65 @@ int main(int argc, char *argv[])
 		       p[counter].req_proto, &p[counter].resp_code,
 		       p[counter].resp_bytes, p[counter].req_referer,
 		       p[counter].req_agent);
+
+            //START
+            _Bool valid = 1;
+            if (is_ipv4_address(p[counter].req_ip) == 0){ valid = 0; }
+            if (num_spaces(p[counter].req_ident) > 0){ valid = 0; }
+            if (num_spaces(p[counter].req_user) > 0){ valid = 0; }
+            if (num_spaces(p[counter].req_datetime) != 1){ valid = 0; }
+            if (num_spaces(p[counter].req_method) > 0){ valid = 0; }
+            if (num_spaces(p[counter].req_uri) > 0){ valid = 0; }
+            if (num_spaces(p[counter].req_proto) > 0){ valid = 0; }
+
+            if(valid == 1){ //valid
+		      if ((counter + 1) == use_batch_size) {
+		        call_flush(p, counter + 1);
+		        counter = 0;
+              }else{
+		        counter++;
+              }
+            }else{ //invalid
+              total_lines_invalid++;
+              invalid_batch_counter++;
+              printf("invalid batch counter = %d\n", invalid_batch_counter);
+              strncpy(pinvalid_lines[invalid_batch_counter-1], log_line, strlen(log_line));
+              printf("---\nAT INVALID LINES BATCH COUNT: %d JUST ADDED: %s\n", invalid_batch_counter, pinvalid_lines[invalid_batch_counter-1]);
+              if(invalid_batch_counter % use_invalid_batch_size == 0) {
+                printf("reached it --- invalid batch size = %d\n", use_invalid_batch_size);
+                printf("invalid batch counter = %d\n", invalid_batch_counter);
+                printf("total invalid lines count = %d\n", total_lines_invalid);
+                flush_invalid(pinvalid_lines, invalid_batch_counter-1);
+                invalid_batch_counter = 0;
+              }
+              printf("invalid_batch_counter after processing invalid line: %d\n", invalid_batch_counter);
+            }
+
+           //END
 	    }
-	    if (counter + 1 == (use_batch_size)) {
-		call_flush(p, counter + 1);
-		counter = 0;
-	    } else {
-		counter++;
-	    }
+        // call if counter > 0?
+        printf("outputting final invalid with %d\n", invalid_batch_counter);
+        if(invalid_batch_counter > 0) { flush_invalid(pinvalid_lines, invalid_batch_counter-1);}
+	    call_flush(p, counter);
+	    fclose(pRead);
+	    files_processed++;
 	}
-	call_flush(p, counter);
+
     }
+    printf("calling final process invalid.\n");
+    //process_invalid(invalidLines, NULL,1);
+    //flush remaining invalid
     free(p);
-    free(invalidLines);
-    invalidLines = 0;
+    //free(invalidLines);
+    //invalidLines = 0;
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     fprintf(stderr, "\n_____ Summary _____\n\n");
     fprintf(stderr, "Files read:\t%d\n", files_processed);
     fprintf(stderr, "Lines read:\t%d\n", total_lines_scanned);
-    fprintf(stderr, "   valid:\t%zu\n",
-	    total_lines_scanned - invalidLinesCount);
-    fprintf(stderr, "   invalid:\t%zu\n", invalidLinesCount);
+    fprintf(stderr, "   valid:\t%d\n",
+	    total_lines_scanned - total_lines_invalid);
+    fprintf(stderr, "   invalid:\t%d\n", total_lines_invalid);
     fprintf(stderr, "Batch size:\t%d\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
     fprintf(stderr, "Output file:\t%s\n", globalArgs.outFileName);
@@ -424,9 +292,9 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Collection:\t%s\n", globalArgs.collection);
     fprintf(stderr, "Time taken:\t%5.2fs\n", cpu_time_used);
 
-    //printf("invalidLinesCount: %zu\n", invalidLinesCount);
+    //printf("total_lines_invalid: %d\n", total_lines_invalid);
     //int index_inv = 0;
-    //for (index_inv = 0; index_inv < invalidLinesCount; index_inv++)
+    //for (index_inv = 0; index_inv < total_lines_invalid; index_inv++)
     //{
     //    printf("invalid line: %s\n", invalidLines[index_inv]);
     //}

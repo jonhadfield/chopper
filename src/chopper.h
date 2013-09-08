@@ -46,3 +46,6 @@ int flush_to_disk(st_http_request *, int);
 int flush_to_mongo(st_http_request *, int);
 int flush_to_stdout(st_http_request *, int);
 int chop();
+_Bool is_ipv4_address(char *ipAddress);
+int isValid(char *log_line);
+size_t num_spaces(char *string);
