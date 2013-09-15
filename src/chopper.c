@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     invalid_lines = malloc(use_batch_size * sizeof(char *));
 
     size_t total_lines_invalid = 0;
-    size_t total_lines_scanned = 0;
+    size_t total_lines_read = 0;
     size_t files_processed = 0;
     char log_line[MAX_LINE_LENGTH];
 
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 	    size_t line_index = 0;
 	    size_t invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, input_file) != NULL) {
-		total_lines_scanned++;
+		total_lines_read++;
 		if ((globalArgs.search_string != NULL)
 		    && (strstr(log_line, globalArgs.search_string) ==
 			NULL))
@@ -230,9 +230,9 @@ int main(int argc, char *argv[])
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     fprintf(stderr, "\n_____ Summary _____\n\n");
     fprintf(stderr, "Files read:\t%zu\n", files_processed);
-    fprintf(stderr, "Lines read:\t%zu\n", total_lines_scanned);
+    fprintf(stderr, "Lines read:\t%zu\n", total_lines_read);
     fprintf(stderr, "   valid:\t%zu\n",
-	    total_lines_scanned - total_lines_invalid);
+	    total_lines_read - total_lines_invalid);
     fprintf(stderr, "   invalid:\t%zu\n", total_lines_invalid);
     fprintf(stderr, "Batch size:\t%zu\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
