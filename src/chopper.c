@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 		       scanned_lines[line_index].resp_bytes,
 		       scanned_lines[line_index].req_referer,
 		       scanned_lines[line_index].req_agent);
-		if (is_scanned_line_valid(scanned_lines[line_index]) == 1) {
+		if (is_scanned_line_valid(scanned_lines[line_index])) {
 		    if ((line_index + 1) == use_batch_size) {
 			flush_valid(scanned_lines, line_index + 1);
 			line_index = 0;
