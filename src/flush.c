@@ -21,7 +21,7 @@ void flush_invalid(char **invalid_lines, int countval)
 	pWrite = fopen(globalArgs.outFileNameInvalid, "a");
 	int flush_count;
 	for (flush_count = 0; flush_count < countval; flush_count++) {
-	    fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
+	    fprintf(pWrite, "%s", invalid_lines[flush_count]);
 	}
 	fclose(pWrite);
     }
