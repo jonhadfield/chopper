@@ -45,6 +45,7 @@ struct globalArgs_t {
 void flush_valid(st_http_request *, int);
 void flush_invalid(char **, int);
 _Bool is_scanned_line_valid(st_http_request);
+_Bool is_unscanned_line_valid(char *);
 int flush_to_disk(st_http_request *, int);
 int flush_to_mongo(st_http_request *, int);
 int flush_to_stdout(st_http_request *, int);

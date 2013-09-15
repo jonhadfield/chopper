@@ -167,6 +167,28 @@ int main(int argc, char *argv[])
 	    size_t invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, input_file) != NULL) {
 		total_lines_read++;
+
+        if(!is_unscanned_line_valid(log_line)){
+		    total_lines_invalid++;
+		    invalid_lines[invalid_batch_counter] =
+			malloc(strlen(log_line) + 1 * (sizeof(char)));
+		    strcpy(invalid_lines[invalid_batch_counter], log_line);
+		    if ((invalid_batch_counter + 1) == use_batch_size) {
+			flush_invalid(invalid_lines,
+				      invalid_batch_counter + 1);
+			size_t reset_counter;
+			for (reset_counter = 0;
+			     reset_counter < invalid_batch_counter;
+			     reset_counter++) {
+			    free(invalid_lines[reset_counter]);
+			}
+			invalid_batch_counter = 0;
+		    } else {
+			invalid_batch_counter++;
+		    }
+            continue;
+        }
+
 		if ((globalArgs.search_string != NULL)
 		    && (strstr(log_line, globalArgs.search_string) ==
 			NULL))

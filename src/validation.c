@@ -126,13 +126,13 @@ _Bool is_scanned_line_valid(st_http_request scanned_line)
 }
 
 
-int isValid(char *log_line)
+_Bool is_unscanned_line_valid(char *log_line)
 {
     if (is_utf8(log_line) != 1 || log_line == NULL || strlen(log_line) <= 1
 	|| log_line[0] == '\0' || strlen(log_line) > MAX_LINE_LENGTH - 1) {
-	printf("This line is invalid: %s\n", log_line);
-	return (1);
-    } else {
+	printf("DEBUG: Found invalid unscanned line:  %s\n", log_line);
 	return (0);
+    } else {
+	return (1);
     }
 }
