@@ -63,6 +63,36 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
+
+_Bool is_scanned_line_valid(st_http_request scanned_line)
+{
+    _Bool is_valid = 1;
+    if (is_ipv4_address(scanned_line.req_ip)
+	== 0) {
+	is_valid = 0;
+    }
+    if (num_spaces(scanned_line.req_ident) > 0) {
+	is_valid = 0;
+    }
+    if (num_spaces(scanned_line.req_user) > 0) {
+	is_valid = 0;
+    }
+    if (num_spaces(scanned_line.req_datetime)
+	!= 1) {
+	is_valid = 0;
+    }
+    if (num_spaces(scanned_line.req_method) > 0) {
+	is_valid = 0;
+    }
+    if (num_spaces(scanned_line.req_uri) > 0) {
+	is_valid = 0;
+    }
+    if (num_spaces(scanned_line.req_proto) > 0) {
+	is_valid = 0;
+    }
+    return is_valid;
+}
+
 int main(int argc, char *argv[])
 {
     int opt = 0;
@@ -142,7 +172,7 @@ int main(int argc, char *argv[])
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
 
     scanned_lines = (st_http_request *) calloc(use_batch_size,
-				   sizeof(st_http_request));
+					       sizeof(st_http_request));
     if (scanned_lines == NULL) {
 	fprintf(stderr, "Failed to allocate memory.\n");
 	free(scanned_lines);
@@ -172,37 +202,18 @@ int main(int argc, char *argv[])
 		    continue;
 		sscanf(log_line,
 		       f_combined,
-		       scanned_lines[line_index].req_ip, scanned_lines[line_index].req_ident,
-		       scanned_lines[line_index].req_user, scanned_lines[line_index].req_datetime,
-		       scanned_lines[line_index].req_method, scanned_lines[line_index].req_uri,
-		       scanned_lines[line_index].req_proto, &scanned_lines[line_index].resp_code,
-		       scanned_lines[line_index].resp_bytes, scanned_lines[line_index].req_referer,
+		       scanned_lines[line_index].req_ip,
+		       scanned_lines[line_index].req_ident,
+		       scanned_lines[line_index].req_user,
+		       scanned_lines[line_index].req_datetime,
+		       scanned_lines[line_index].req_method,
+		       scanned_lines[line_index].req_uri,
+		       scanned_lines[line_index].req_proto,
+		       &scanned_lines[line_index].resp_code,
+		       scanned_lines[line_index].resp_bytes,
+		       scanned_lines[line_index].req_referer,
 		       scanned_lines[line_index].req_agent);
-
-		_Bool valid = 1;
-		if (is_ipv4_address(scanned_lines[line_index].req_ip) == 0) {
-		    valid = 0;
-		}
-		if (num_spaces(scanned_lines[line_index].req_ident) > 0) {
-		    valid = 0;
-		}
-		if (num_spaces(scanned_lines[line_index].req_user) > 0) {
-		    valid = 0;
-		}
-		if (num_spaces(scanned_lines[line_index].req_datetime) != 1) {
-		    valid = 0;
-		}
-		if (num_spaces(scanned_lines[line_index].req_method) > 0) {
-		    valid = 0;
-		}
-		if (num_spaces(scanned_lines[line_index].req_uri) > 0) {
-		    valid = 0;
-		}
-		if (num_spaces(scanned_lines[line_index].req_proto) > 0) {
-		    valid = 0;
-		}
-
-		if (valid == 1) {
+		if (is_scanned_line_valid(scanned_lines[line_index]) == 1) {
 		    if ((line_index + 1) == use_batch_size) {
 			flush_valid(scanned_lines, line_index + 1);
 			line_index = 0;
@@ -213,12 +224,10 @@ int main(int argc, char *argv[])
 		    total_lines_invalid++;
 		    invalid_lines[invalid_batch_counter] =
 			malloc(strlen(log_line) + 1 * (sizeof(char)));
-		    strcpy(invalid_lines[invalid_batch_counter],
-			   log_line);
-
+		    strcpy(invalid_lines[invalid_batch_counter], log_line);
 		    if ((invalid_batch_counter + 1) == use_batch_size) {
 			flush_invalid(invalid_lines,
-					   invalid_batch_counter + 1);
+				      invalid_batch_counter + 1);
 			int reset_counter;
 			for (reset_counter = 0;
 			     reset_counter < invalid_batch_counter;
