@@ -158,14 +158,14 @@ int main(int argc, char *argv[])
     char log_line[MAX_LINE_LENGTH];
 
     if (globalArgs.numInputFiles > 0) {
-	FILE *pRead;
+	FILE *input_file;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
 	    printf("Processing file [%zu/%d]: %s\n",
 		   f_count+1, globalArgs.numInputFiles, globalArgs.inputFiles[f_count]);
-	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
+	    input_file = fopen(globalArgs.inputFiles[f_count], "r");
 	    size_t line_index = 0;
 	    size_t invalid_batch_counter = 0;
-	    while (fgets(log_line, 8192, pRead) != NULL) {
+	    while (fgets(log_line, 8192, input_file) != NULL) {
 		total_lines_scanned++;
 		if ((globalArgs.search_string != NULL)
 		    && (strstr(log_line, globalArgs.search_string) ==
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
 		 reset_counter++) {
 		free(invalid_lines[reset_counter]);
 	    }
-	    fclose(pRead);
+	    fclose(input_file);
 	    files_processed++;
 	}
 
