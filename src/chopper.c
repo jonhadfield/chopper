@@ -63,12 +63,12 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-void free_array(char ** strings, size_t num_elements){
-        size_t reset_counter;
-	    for (reset_counter = 0; reset_counter < num_elements;
-		 reset_counter++) {
-		free(strings[reset_counter]);
-	    }
+void free_array(char **strings, size_t num_elements)
+{
+    size_t reset_counter;
+    for (reset_counter = 0; reset_counter < num_elements; reset_counter++) {
+	free(strings[reset_counter]);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -169,14 +169,15 @@ int main(int argc, char *argv[])
 	FILE *input_file;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
 	    printf("Processing file [%zu/%d]: %s\n",
-		   f_count+1, globalArgs.numInputFiles, globalArgs.inputFiles[f_count]);
+		   f_count + 1, globalArgs.numInputFiles,
+		   globalArgs.inputFiles[f_count]);
 	    input_file = fopen(globalArgs.inputFiles[f_count], "r");
 	    size_t line_index = 0;
 	    size_t invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, input_file) != NULL) {
 		total_lines_read++;
 
-        if(!is_unscanned_line_valid(log_line)){
+		if (!is_unscanned_line_valid(log_line)) {
 		    total_lines_invalid++;
 		    invalid_lines[invalid_batch_counter] =
 			malloc(strlen(log_line) + 1 * (sizeof(char)));
@@ -194,8 +195,8 @@ int main(int argc, char *argv[])
 		    } else {
 			invalid_batch_counter++;
 		    }
-            continue;
-        }
+		    continue;
+		}
 
 		if ((globalArgs.search_string != NULL)
 		    && (strstr(log_line, globalArgs.search_string) ==
@@ -229,7 +230,7 @@ int main(int argc, char *argv[])
 		    if ((invalid_batch_counter + 1) == use_batch_size) {
 			flush_invalid(invalid_lines,
 				      invalid_batch_counter + 1);
-	        free_array(invalid_lines, invalid_batch_counter);
+			free_array(invalid_lines, invalid_batch_counter);
 			invalid_batch_counter = 0;
 		    } else {
 			invalid_batch_counter++;
@@ -240,7 +241,7 @@ int main(int argc, char *argv[])
 	    flush_valid(scanned_lines, line_index);
 	    flush_invalid(invalid_lines, invalid_batch_counter);
 	    free_array(invalid_lines, invalid_batch_counter);
-        invalid_batch_counter = 0; 
+	    invalid_batch_counter = 0;
 	    fclose(input_file);
 	    files_processed++;
 	}
