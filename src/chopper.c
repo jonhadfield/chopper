@@ -63,6 +63,14 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
+void free_array(char ** strings, size_t num_elements){
+        size_t reset_counter;
+	    for (reset_counter = 0; reset_counter < num_elements;
+		 reset_counter++) {
+		free(strings[reset_counter]);
+	    }
+}
+
 int main(int argc, char *argv[])
 {
     int opt = 0;
@@ -221,12 +229,7 @@ int main(int argc, char *argv[])
 		    if ((invalid_batch_counter + 1) == use_batch_size) {
 			flush_invalid(invalid_lines,
 				      invalid_batch_counter + 1);
-			size_t reset_counter;
-			for (reset_counter = 0;
-			     reset_counter < invalid_batch_counter;
-			     reset_counter++) {
-			    free(invalid_lines[reset_counter]);
-			}
+	        free_array(invalid_lines, invalid_batch_counter);
 			invalid_batch_counter = 0;
 		    } else {
 			invalid_batch_counter++;
@@ -236,11 +239,8 @@ int main(int argc, char *argv[])
 	    }
 	    flush_valid(scanned_lines, line_index);
 	    flush_invalid(invalid_lines, invalid_batch_counter);
-	    size_t reset_counter;
-	    for (reset_counter = 0; reset_counter < invalid_batch_counter;
-		 reset_counter++) {
-		free(invalid_lines[reset_counter]);
-	    }
+	    free_array(invalid_lines, invalid_batch_counter);
+        invalid_batch_counter = 0; 
 	    fclose(input_file);
 	    files_processed++;
 	}
