@@ -5,6 +5,29 @@
 #include "mongo.h"
 #include "chopper.h"
 
+void flush_valid(st_http_request * scanned_lines, int countval)
+{
+    if (globalArgs.outFileName != NULL)
+	flush_to_disk(scanned_lines, countval);
+    if (globalArgs.host != NULL && globalArgs.collection != NULL)
+	flush_to_mongo(scanned_lines, countval);
+    if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
+	flush_to_stdout(scanned_lines, countval);
+}
+
+  void call_flush_invalid(char **invalid_lines, int countval)
+  {
+     if (globalArgs.outFileNameInvalid != NULL) {
+     FILE *pWrite;
+     pWrite = fopen(globalArgs.outFileNameInvalid, "a");
+      int flush_count;
+     for (flush_count = 0; flush_count < countval; flush_count++) {
+         fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
+    }
+     fclose(pWrite);
+     }
+  }
+
 int flush_to_disk(st_http_request * p, int counter)
 {
     FILE *pWrite;
@@ -21,9 +44,9 @@ int flush_to_disk(st_http_request * p, int counter)
 int flush_to_mongo(st_http_request * p, int counter)
 {
     mongo conn;
-    mongo_init( &conn );
-    mongo_set_op_timeout( &conn, 10000);
-    int status = mongo_client( &conn, globalArgs.host, globalArgs.port );
+    mongo_init(&conn);
+    mongo_set_op_timeout(&conn, 10000);
+    int status = mongo_client(&conn, globalArgs.host, globalArgs.port);
     if (status != MONGO_OK) {
 	switch (conn.err) {
 	case MONGO_CONN_SUCCESS:
@@ -123,13 +146,13 @@ int flush_to_stdout(st_http_request * p, int counter)
 {
     int flush_count;
     for (flush_count = 0; flush_count < counter; flush_count++) {
-	printf("%s %s %s [%s] \"%s %s %s\" %d %s \"%s\" \"%s\"\n", 
-          p[flush_count].req_ip, p[flush_count].req_ident, 
-          p[flush_count].req_user, p[flush_count].req_datetime, 
-          p[flush_count].req_method, p[flush_count].req_uri,
-	      p[flush_count].req_proto, p[flush_count].resp_code, 
-          p[flush_count].resp_bytes, p[flush_count].req_referer, 
-          p[flush_count].req_agent);
+	printf("%s %s %s [%s] \"%s %s %s\" %d %s \"%s\" \"%s\"\n",
+	       p[flush_count].req_ip, p[flush_count].req_ident,
+	       p[flush_count].req_user, p[flush_count].req_datetime,
+	       p[flush_count].req_method, p[flush_count].req_uri,
+	       p[flush_count].req_proto, p[flush_count].resp_code,
+	       p[flush_count].resp_bytes, p[flush_count].req_referer,
+	       p[flush_count].req_agent);
     }
     return (0);
 }

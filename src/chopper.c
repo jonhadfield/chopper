@@ -63,29 +63,6 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-void call_flush(st_http_request * scanned_lines, int countval)
-{
-    if (globalArgs.outFileName != NULL)
-	flush_to_disk(scanned_lines, countval);
-    if (globalArgs.host != NULL && globalArgs.collection != NULL)
-	flush_to_mongo(scanned_lines, countval);
-    if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
-	flush_to_stdout(scanned_lines, countval);
-}
-
-void call_flush_invalid(char **invalid_lines, int countval)
-{
-    if (globalArgs.outFileNameInvalid != NULL) {
-	FILE *pWrite;
-	pWrite = fopen(globalArgs.outFileNameInvalid, "a");
-	int flush_count;
-	for (flush_count = 0; flush_count < countval; flush_count++) {
-	    fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
-	}
-	fclose(pWrite);
-    }
-}
-
 int main(int argc, char *argv[])
 {
     int opt = 0;
@@ -227,7 +204,7 @@ int main(int argc, char *argv[])
 
 		if (valid == 1) {
 		    if ((line_index + 1) == use_batch_size) {
-			call_flush(scanned_lines, line_index + 1);
+			flush_valid(scanned_lines, line_index + 1);
 			line_index = 0;
 		    } else {
 			line_index++;
@@ -255,7 +232,7 @@ int main(int argc, char *argv[])
 
 		}
 	    }
-	    call_flush(scanned_lines, line_index);
+	    flush_valid(scanned_lines, line_index);
 	    call_flush_invalid(invalid_lines, invalid_batch_counter);
 	    int reset_counter;
 	    for (reset_counter = 0; reset_counter < invalid_batch_counter;

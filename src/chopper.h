@@ -42,6 +42,8 @@ struct globalArgs_t {
     int numInputFiles;		    /* # of input files */
 } globalArgs;
 
+void flush_valid(st_http_request *, int);
+void call_flush_invalid(char **, int);
 int flush_to_disk(st_http_request *, int);
 int flush_to_mongo(st_http_request *, int);
 int flush_to_stdout(st_http_request *, int);
