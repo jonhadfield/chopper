@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 			   log_line);
 
 		    if ((invalid_batch_counter + 1) == use_batch_size) {
-			call_flush_invalid(invalid_lines,
+			flush_invalid(invalid_lines,
 					   invalid_batch_counter + 1);
 			int reset_counter;
 			for (reset_counter = 0;
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	    flush_valid(scanned_lines, line_index);
-	    call_flush_invalid(invalid_lines, invalid_batch_counter);
+	    flush_invalid(invalid_lines, invalid_batch_counter);
 	    int reset_counter;
 	    for (reset_counter = 0; reset_counter < invalid_batch_counter;
 		 reset_counter++) {

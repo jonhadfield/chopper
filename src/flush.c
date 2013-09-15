@@ -15,7 +15,7 @@ void flush_valid(st_http_request * scanned_lines, int countval)
 	flush_to_stdout(scanned_lines, countval);
 }
 
-  void call_flush_invalid(char **invalid_lines, int countval)
+  void flush_invalid(char **invalid_lines, int countval)
   {
      if (globalArgs.outFileNameInvalid != NULL) {
      FILE *pWrite;
