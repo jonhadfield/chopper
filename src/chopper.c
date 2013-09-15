@@ -63,36 +63,6 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-
-_Bool is_scanned_line_valid(st_http_request scanned_line)
-{
-    _Bool is_valid = 1;
-    if (is_ipv4_address(scanned_line.req_ip)
-	== 0) {
-	is_valid = 0;
-    }
-    if (num_spaces(scanned_line.req_ident) > 0) {
-	is_valid = 0;
-    }
-    if (num_spaces(scanned_line.req_user) > 0) {
-	is_valid = 0;
-    }
-    if (num_spaces(scanned_line.req_datetime)
-	!= 1) {
-	is_valid = 0;
-    }
-    if (num_spaces(scanned_line.req_method) > 0) {
-	is_valid = 0;
-    }
-    if (num_spaces(scanned_line.req_uri) > 0) {
-	is_valid = 0;
-    }
-    if (num_spaces(scanned_line.req_proto) > 0) {
-	is_valid = 0;
-    }
-    return is_valid;
-}
-
 int main(int argc, char *argv[])
 {
     int opt = 0;

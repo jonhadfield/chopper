@@ -1,6 +1,6 @@
 #define  MAX_LINE_LENGTH    8192
 #define  MAX_IP               16
-#define  MAX_IDENT           513 
+#define  MAX_IDENT           513
 #define  MAX_USER            513
 #define  MAX_DATETIME         27
 #define  MAX_METHOD            8
@@ -11,7 +11,7 @@
 #define  MAX_AGENT          1024	//Safe limit?
 
 #define  BATCH_SIZE         20000
-#define  MAX_BSON_SIZE  16777216    //16MB
+#define  MAX_BSON_SIZE  16777216	//16MB
 
 typedef struct {
     char req_ip[MAX_IP];
@@ -30,20 +30,21 @@ typedef struct {
 struct globalArgs_t {
     const char *outFileName;	/* -o option */
     FILE *outFile;
-    char *type;			        /* -t option */
-    char *batch_size;		    /* -b option */
-    char *host;			        /* -h option */
-    int port;			        /* -p option */
-    char *collection;		    /* -c option */
-    char *search_string;	    /* -s option */
+    char *type;			/* -t option */
+    char *batch_size;		/* -b option */
+    char *host;			/* -h option */
+    int port;			/* -p option */
+    char *collection;		/* -c option */
+    char *search_string;	/* -s option */
     char *outFileNameInvalid;	/* -O option */
-    int verbose;		        /* verbosity */
-    char **inputFiles;		    /* input files */
-    int numInputFiles;		    /* # of input files */
+    int verbose;		/* verbosity */
+    char **inputFiles;		/* input files */
+    int numInputFiles;		/* # of input files */
 } globalArgs;
 
 void flush_valid(st_http_request *, int);
 void flush_invalid(char **, int);
+_Bool is_scanned_line_valid(st_http_request);
 int flush_to_disk(st_http_request *, int);
 int flush_to_mongo(st_http_request *, int);
 int flush_to_stdout(st_http_request *, int);
