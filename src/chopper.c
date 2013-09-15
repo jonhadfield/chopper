@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     start = clock();
     size_t f_count;
     st_http_request *scanned_lines;
-    int use_batch_size;
+    size_t use_batch_size;
     if (globalArgs.batch_size != '\0') {
 	use_batch_size = atoi(globalArgs.batch_size);
     } else {
@@ -152,8 +152,9 @@ int main(int argc, char *argv[])
     char **invalid_lines;
     invalid_lines = malloc(use_batch_size * sizeof(char *));
 
-    int total_lines_invalid = 0;
-    int total_lines_scanned = 0, files_processed = 0;
+    size_t total_lines_invalid = 0;
+    size_t total_lines_scanned = 0;
+    size_t files_processed = 0;
     char log_line[MAX_LINE_LENGTH];
 
     if (globalArgs.numInputFiles > 0) {
@@ -162,8 +163,8 @@ int main(int argc, char *argv[])
 	    printf("Processing file [%zu/%d]: %s\n",
 		   f_count+1, globalArgs.numInputFiles, globalArgs.inputFiles[f_count]);
 	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
-	    int line_index = 0;
-	    int invalid_batch_counter = 0;
+	    size_t line_index = 0;
+	    size_t invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, pRead) != NULL) {
 		total_lines_scanned++;
 		if ((globalArgs.search_string != NULL)
@@ -198,7 +199,7 @@ int main(int argc, char *argv[])
 		    if ((invalid_batch_counter + 1) == use_batch_size) {
 			flush_invalid(invalid_lines,
 				      invalid_batch_counter + 1);
-			int reset_counter;
+			size_t reset_counter;
 			for (reset_counter = 0;
 			     reset_counter < invalid_batch_counter;
 			     reset_counter++) {
@@ -213,7 +214,7 @@ int main(int argc, char *argv[])
 	    }
 	    flush_valid(scanned_lines, line_index);
 	    flush_invalid(invalid_lines, invalid_batch_counter);
-	    int reset_counter;
+	    size_t reset_counter;
 	    for (reset_counter = 0; reset_counter < invalid_batch_counter;
 		 reset_counter++) {
 		free(invalid_lines[reset_counter]);
@@ -228,12 +229,12 @@ int main(int argc, char *argv[])
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     fprintf(stderr, "\n_____ Summary _____\n\n");
-    fprintf(stderr, "Files read:\t%d\n", files_processed);
-    fprintf(stderr, "Lines read:\t%d\n", total_lines_scanned);
-    fprintf(stderr, "   valid:\t%d\n",
+    fprintf(stderr, "Files read:\t%zu\n", files_processed);
+    fprintf(stderr, "Lines read:\t%zu\n", total_lines_scanned);
+    fprintf(stderr, "   valid:\t%zu\n",
 	    total_lines_scanned - total_lines_invalid);
-    fprintf(stderr, "   invalid:\t%d\n", total_lines_invalid);
-    fprintf(stderr, "Batch size:\t%d\n", use_batch_size);
+    fprintf(stderr, "   invalid:\t%zu\n", total_lines_invalid);
+    fprintf(stderr, "Batch size:\t%zu\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
     fprintf(stderr, "Output file:\t%s\n", globalArgs.outFileName);
     fprintf(stderr, "Output invalid:\t%s\n",
