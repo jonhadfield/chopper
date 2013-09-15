@@ -167,13 +167,13 @@ int main(int argc, char *argv[])
 
     if (globalArgs.numInputFiles > 0) {
 	FILE *input_file;
+	size_t invalid_batch_counter = 0;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
 	    printf("Processing file [%zu/%d]: %s\n",
 		   f_count + 1, globalArgs.numInputFiles,
 		   globalArgs.inputFiles[f_count]);
 	    input_file = fopen(globalArgs.inputFiles[f_count], "r");
 	    size_t line_index = 0;
-	    size_t invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, input_file) != NULL) {
 		total_lines_read++;
 
