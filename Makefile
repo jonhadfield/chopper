@@ -3,7 +3,7 @@ OBJECTS=flush.o chopper.o validation.o
 CFLAGS=-static-libgcc -O2 -Wall --std=c99 -pedantic
 LDFLAGS=
 LDLIBS=-Lext/mongo/lib -Iext/mongo/include -lz -lmongoc
-CC=gcc -g
+CC=gcc
 
 $(PROG_NAME) : $(OBJECTS)
 	$(CC) $(OBJECTS) -o $(PROG_NAME) $(LDLIBS)
