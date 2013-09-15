@@ -80,7 +80,7 @@ int flush_to_mongo(st_http_request * p, int counter)
 	    break;
 	}
 
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     bson **bps;

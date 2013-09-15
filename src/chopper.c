@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     if (tmp == NULL) {
 	fprintf(stderr, "Failed to allocate memory.\n");
 	free(tmp);
-	exit(1);
+	exit(EXIT_FAILURE);
     } else {
 	p = tmp;
 	free(tmp);
@@ -281,5 +281,5 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Collection:\t%s\n", globalArgs.collection);
     fprintf(stderr, "Time taken:\t%5.2fs\n", cpu_time_used);
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
