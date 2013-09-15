@@ -78,7 +78,6 @@ void call_flush_invalid(char **invalid_lines, int countval) {
         pWrite = fopen(globalArgs.outFileNameInvalid, "a");
         int flush_count;
         for (flush_count = 0; flush_count < countval; flush_count++) {
-           //printf("index: %d line: %s\n",flush_count, invalid_lines[flush_count]);
            fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
         }
         fclose(pWrite);
@@ -159,18 +158,9 @@ int main(int argc, char *argv[])
     } else {
 	use_batch_size = BATCH_SIZE;
     }
-    //fprintf(stderr, "\n_____ Summary _____\n\n");
-    //fprintf(stderr, "using batch size: %d\n", use_batch_size);
-    //fprintf(stderr, "Size of st_http_request: %lu\n",
-	//    sizeof(st_http_request));
-    //fprintf(stderr, "Total mem = %lu\n",
-	//    use_batch_size * sizeof(st_http_request));
-    //fprintf(stderr, "Total mem in MB = %lu\n",
-	//    use_batch_size * sizeof(st_http_request) / 1024 / 1024);
     
     const char *f_combined =
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
-    //int use_batch_size = BATCH_SIZE;
 
     tmp =
 	(st_http_request *) calloc(use_batch_size,
