@@ -73,13 +73,12 @@ void call_flush(st_http_request * p, int countval) {
 	    flush_to_stdout(p, countval);
 }
 void call_flush_invalid(char **invalid_lines, int countval) {
-    printf("here and countval is: %d\n",countval);
 	if (globalArgs.outFileNameInvalid != NULL){
         FILE *pWrite;
         pWrite = fopen(globalArgs.outFileNameInvalid, "a");
         int flush_count;
         for (flush_count = 0; flush_count < countval; flush_count++) {
-           printf("index: %d line: %s\n",flush_count, invalid_lines[flush_count]);
+           //printf("index: %d line: %s\n",flush_count, invalid_lines[flush_count]);
            fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
         }
         fclose(pWrite);
@@ -194,11 +193,10 @@ int main(int argc, char *argv[])
     int total_lines_scanned = 0, files_processed = 0;
     char log_line[MAX_LINE_LENGTH];
 
-    printf("numInputFiles = %d\n", globalArgs.numInputFiles);
     if (globalArgs.numInputFiles > 0) {
 	FILE *pRead;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
-        printf("opening file: %s\n", globalArgs.inputFiles[f_count]);
+        printf("Processing file: %s\n", globalArgs.inputFiles[f_count]);
 	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	    int counter = 0;
         int invalid_batch_counter = 0;
@@ -223,19 +221,17 @@ int main(int argc, char *argv[])
             if (num_spaces(p[counter].req_uri) > 0){ valid = 0; }
             if (num_spaces(p[counter].req_proto) > 0){ valid = 0; }
 
-            // if valid, check if it's time to process valid batch
-            if(valid == 1){ //VALID
+            if(valid == 1){
 		      if ((counter + 1) == use_batch_size) {
 		        call_flush(p, counter + 1);
 		        counter = 0;
               }else{
 		        counter++;
               }
-            }else{ // if invalid, check if it's time to process invalid batch
+            }else{
               total_lines_invalid++;
               pinvalid_lines[invalid_batch_counter] = malloc(strlen(log_line)+1 * (sizeof(char)));
               strcpy(pinvalid_lines[invalid_batch_counter], log_line);
-              printf("line: %s\n", pinvalid_lines[invalid_batch_counter]);
 
 		      if ((invalid_batch_counter + 1) == use_batch_size) {
 		        call_flush_invalid(pinvalid_lines, invalid_batch_counter + 1);
@@ -250,9 +246,7 @@ int main(int argc, char *argv[])
 
             }
 	    }
-        printf("outputting final invalid with %d\n", invalid_batch_counter);
 	    call_flush(p, counter);
-        printf("final invalid_batch_counter = %d\n",invalid_batch_counter);
 		call_flush_invalid(pinvalid_lines, invalid_batch_counter);
         int reset_counter;
         for(reset_counter = 0; reset_counter < invalid_batch_counter; reset_counter++){
@@ -276,6 +270,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Batch size:\t%d\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
     fprintf(stderr, "Output file:\t%s\n", globalArgs.outFileName);
+    fprintf(stderr, "Output invalid:\t%s\n", globalArgs.outFileNameInvalid);
     fprintf(stderr, "Host:\t%s\n", globalArgs.host);
     fprintf(stderr, "Port:\t%d\n", globalArgs.port);
     fprintf(stderr, "Collection:\t%s\n", globalArgs.collection);
