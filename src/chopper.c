@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     clock_t start, end;
     double cpu_time_used;
     start = clock();
-    int f_count;
+    size_t f_count;
     st_http_request *scanned_lines;
     int use_batch_size;
     if (globalArgs.batch_size != '\0') {
@@ -159,8 +159,8 @@ int main(int argc, char *argv[])
     if (globalArgs.numInputFiles > 0) {
 	FILE *pRead;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
-	    printf("Processing file: %s\n",
-		   globalArgs.inputFiles[f_count]);
+	    printf("Processing file [%zu/%d]: %s\n",
+		   f_count+1, globalArgs.numInputFiles, globalArgs.inputFiles[f_count]);
 	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	    int line_index = 0;
 	    int invalid_batch_counter = 0;
