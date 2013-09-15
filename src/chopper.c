@@ -64,34 +64,6 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-//void flush_invalid(char invalid_lines[][MAX_LINE_LENGTH], int flush_size) {
-    //printf("\n--- in flush_invalid ---\n");
-    //printf("total_lines_invalid = %d\n", total_lines_invalid);
-    //printf("flush_size = %d\n", flush_size);
-//    if (globalArgs.outFileNameInvalid)
- //   {
-  //      FILE *pWriteInvalid;
-   //     pWriteInvalid = fopen(globalArgs.outFileNameInvalid, "a");
-     //   if (pWriteInvalid != NULL){
-      //      //int loop_start = total_lines_invalid - (flush_size);
-      //      int loop_start = 0;
-            //printf("loop_start = %d\n", loop_start);
-            //size_t loop_end = loop_start + flush_size;
-            //int loop_end = total_lines_invalid;
-      //      int loop_end = flush_size;
-            //printf("loop_end = %d\n", loop_end);
-      //      int index;
-      //      for (index = loop_start; index < flush_size; index++){
-                //printf("index: %d\n", index);
-                //printf("at index %d writing line... %s\n", index, invalid_lines[index]);
-      //          fputs(invalid_lines[index], pWriteInvalid);
-      //      }
-      //  }
-      //  fclose(pWriteInvalid);
-      //  printf("closed file for writing\n------------\n");
-   // }
-//}
-
 void call_flush(st_http_request * p, int countval) {
 	if (globalArgs.outFileName != NULL)
 	    flush_to_disk(p, countval);
@@ -182,12 +154,12 @@ int main(int argc, char *argv[])
     start = clock();
     int f_count;
     st_http_request *p, *tmp;
-    //int use_batch_size;
-    //if (globalArgs.batch_size != '\0') {
-	//use_batch_size = atoi(globalArgs.batch_size);
-    //} else {
-	//use_batch_size = BATCH_SIZE;
-    //}
+    int use_batch_size;
+    if (globalArgs.batch_size != '\0') {
+	use_batch_size = atoi(globalArgs.batch_size);
+    } else {
+	use_batch_size = BATCH_SIZE;
+    }
     //fprintf(stderr, "\n_____ Summary _____\n\n");
     //fprintf(stderr, "using batch size: %d\n", use_batch_size);
     //fprintf(stderr, "Size of st_http_request: %lu\n",
@@ -199,7 +171,7 @@ int main(int argc, char *argv[])
     
     const char *f_combined =
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
-    int use_batch_size = BATCH_SIZE;
+    //int use_batch_size = BATCH_SIZE;
 
     tmp =
 	(st_http_request *) calloc(use_batch_size,
@@ -242,7 +214,6 @@ int main(int argc, char *argv[])
 		       p[counter].resp_bytes, p[counter].req_referer,
 		       p[counter].req_agent);
 
-            //START
             _Bool valid = 1;
             if (is_ipv4_address(p[counter].req_ip) == 0){ valid = 0; }
             if (num_spaces(p[counter].req_ident) > 0){ valid = 0; }
@@ -279,7 +250,6 @@ int main(int argc, char *argv[])
 
             }
 	    }
-        // call if counter > 0?
         printf("outputting final invalid with %d\n", invalid_batch_counter);
 	    call_flush(p, counter);
         printf("final invalid_batch_counter = %d\n",invalid_batch_counter);
@@ -295,8 +265,6 @@ int main(int argc, char *argv[])
     }
     free(p);
     free(pinvalid_lines);
-    //free(invalidLines);
-    //invalidLines = 0;
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     fprintf(stderr, "\n_____ Summary _____\n\n");
@@ -313,11 +281,5 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Collection:\t%s\n", globalArgs.collection);
     fprintf(stderr, "Time taken:\t%5.2fs\n", cpu_time_used);
 
-    //printf("total_lines_invalid: %d\n", total_lines_invalid);
-    //int index_inv = 0;
-    //for (index_inv = 0; index_inv < total_lines_invalid; index_inv++)
-    //{
-    //    printf("invalid line: %s\n", invalidLines[index_inv]);
-    //}
     exit(0);
 }
