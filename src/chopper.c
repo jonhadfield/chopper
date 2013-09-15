@@ -64,23 +64,26 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-void call_flush(st_http_request * p, int countval) {
-	if (globalArgs.outFileName != NULL)
-	    flush_to_disk(p, countval);
-	if (globalArgs.host != NULL && globalArgs.collection != NULL)
-	    flush_to_mongo(p, countval);
-	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
-	    flush_to_stdout(p, countval);
+void call_flush(st_http_request * p, int countval)
+{
+    if (globalArgs.outFileName != NULL)
+	flush_to_disk(p, countval);
+    if (globalArgs.host != NULL && globalArgs.collection != NULL)
+	flush_to_mongo(p, countval);
+    if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
+	flush_to_stdout(p, countval);
 }
-void call_flush_invalid(char **invalid_lines, int countval) {
-	if (globalArgs.outFileNameInvalid != NULL){
-        FILE *pWrite;
-        pWrite = fopen(globalArgs.outFileNameInvalid, "a");
-        int flush_count;
-        for (flush_count = 0; flush_count < countval; flush_count++) {
-           fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
-        }
-        fclose(pWrite);
+
+void call_flush_invalid(char **invalid_lines, int countval)
+{
+    if (globalArgs.outFileNameInvalid != NULL) {
+	FILE *pWrite;
+	pWrite = fopen(globalArgs.outFileNameInvalid, "a");
+	int flush_count;
+	for (flush_count = 0; flush_count < countval; flush_count++) {
+	    fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
+	}
+	fclose(pWrite);
     }
 }
 
@@ -151,33 +154,27 @@ int main(int argc, char *argv[])
     double cpu_time_used;
     start = clock();
     int f_count;
-    st_http_request *p, *tmp;
+    st_http_request *p;
     int use_batch_size;
     if (globalArgs.batch_size != '\0') {
 	use_batch_size = atoi(globalArgs.batch_size);
     } else {
 	use_batch_size = BATCH_SIZE;
     }
-    
+
     const char *f_combined =
 	"%s %s %s [%[^]]] \"%s %s %[^\"]\" %d %s \"%[^\"]\" \"%[^\"]\"";
 
-    tmp =
-	(st_http_request *) calloc(use_batch_size,
-				   sizeof(st_http_request));
-    if (tmp == NULL) {
-	fprintf(stderr, "Failed to allocate memory.\n");
-	free(tmp);
-	exit(EXIT_FAILURE);
-    } else {
-	p = tmp;
-	free(tmp);
-    }
     p = (st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
+    if (p == NULL) {
+	fprintf(stderr, "Failed to allocate memory.\n");
+	free(p);
+	exit(EXIT_FAILURE);
+    }
 
     char **pinvalid_lines;
-    pinvalid_lines = malloc(use_batch_size * sizeof(char*));
+    pinvalid_lines = malloc(use_batch_size * sizeof(char *));
 
     int total_lines_invalid = 0;
     int total_lines_scanned = 0, files_processed = 0;
@@ -186,14 +183,18 @@ int main(int argc, char *argv[])
     if (globalArgs.numInputFiles > 0) {
 	FILE *pRead;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
-        printf("Processing file: %s\n", globalArgs.inputFiles[f_count]);
+	    printf("Processing file: %s\n",
+		   globalArgs.inputFiles[f_count]);
 	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	    int counter = 0;
-        int invalid_batch_counter = 0;
+	    int invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, pRead) != NULL) {
-		    total_lines_scanned++;
-		    if ((globalArgs.search_string != NULL) && (strstr(log_line, globalArgs.search_string) == NULL)) continue;
-		    sscanf(log_line,
+		total_lines_scanned++;
+		if ((globalArgs.search_string != NULL)
+		    && (strstr(log_line, globalArgs.search_string) ==
+			NULL))
+		    continue;
+		sscanf(log_line,
 		       f_combined,
 		       p[counter].req_ip, p[counter].req_ident,
 		       p[counter].req_user, p[counter].req_datetime,
@@ -202,46 +203,66 @@ int main(int argc, char *argv[])
 		       p[counter].resp_bytes, p[counter].req_referer,
 		       p[counter].req_agent);
 
-            _Bool valid = 1;
-            if (is_ipv4_address(p[counter].req_ip) == 0){ valid = 0; }
-            if (num_spaces(p[counter].req_ident) > 0){ valid = 0; }
-            if (num_spaces(p[counter].req_user) > 0){ valid = 0; }
-            if (num_spaces(p[counter].req_datetime) != 1){ valid = 0; }
-            if (num_spaces(p[counter].req_method) > 0){ valid = 0; }
-            if (num_spaces(p[counter].req_uri) > 0){ valid = 0; }
-            if (num_spaces(p[counter].req_proto) > 0){ valid = 0; }
+		_Bool valid = 1;
+		if (is_ipv4_address(p[counter].req_ip) == 0) {
+		    valid = 0;
+		}
+		if (num_spaces(p[counter].req_ident) > 0) {
+		    valid = 0;
+		}
+		if (num_spaces(p[counter].req_user) > 0) {
+		    valid = 0;
+		}
+		if (num_spaces(p[counter].req_datetime) != 1) {
+		    valid = 0;
+		}
+		if (num_spaces(p[counter].req_method) > 0) {
+		    valid = 0;
+		}
+		if (num_spaces(p[counter].req_uri) > 0) {
+		    valid = 0;
+		}
+		if (num_spaces(p[counter].req_proto) > 0) {
+		    valid = 0;
+		}
 
-            if(valid == 1){
-		      if ((counter + 1) == use_batch_size) {
-		        call_flush(p, counter + 1);
-		        counter = 0;
-              }else{
-		        counter++;
-              }
-            }else{
-              total_lines_invalid++;
-              pinvalid_lines[invalid_batch_counter] = malloc(strlen(log_line)+1 * (sizeof(char)));
-              strcpy(pinvalid_lines[invalid_batch_counter], log_line);
+		if (valid == 1) {
+		    if ((counter + 1) == use_batch_size) {
+			call_flush(p, counter + 1);
+			counter = 0;
+		    } else {
+			counter++;
+		    }
+		} else {
+		    total_lines_invalid++;
+		    pinvalid_lines[invalid_batch_counter] =
+			malloc(strlen(log_line) + 1 * (sizeof(char)));
+		    strcpy(pinvalid_lines[invalid_batch_counter],
+			   log_line);
 
-		      if ((invalid_batch_counter + 1) == use_batch_size) {
-		        call_flush_invalid(pinvalid_lines, invalid_batch_counter + 1);
-                int reset_counter;
-                for(reset_counter = 0; reset_counter < invalid_batch_counter; reset_counter++){
-                    free(pinvalid_lines[reset_counter]);
-                }
-                invalid_batch_counter = 0;
-              }else{
-		        invalid_batch_counter++;
-              }
+		    if ((invalid_batch_counter + 1) == use_batch_size) {
+			call_flush_invalid(pinvalid_lines,
+					   invalid_batch_counter + 1);
+			int reset_counter;
+			for (reset_counter = 0;
+			     reset_counter < invalid_batch_counter;
+			     reset_counter++) {
+			    free(pinvalid_lines[reset_counter]);
+			}
+			invalid_batch_counter = 0;
+		    } else {
+			invalid_batch_counter++;
+		    }
 
-            }
+		}
 	    }
 	    call_flush(p, counter);
-		call_flush_invalid(pinvalid_lines, invalid_batch_counter);
-        int reset_counter;
-        for(reset_counter = 0; reset_counter < invalid_batch_counter; reset_counter++){
-            free(pinvalid_lines[reset_counter]);
-        }
+	    call_flush_invalid(pinvalid_lines, invalid_batch_counter);
+	    int reset_counter;
+	    for (reset_counter = 0; reset_counter < invalid_batch_counter;
+		 reset_counter++) {
+		free(pinvalid_lines[reset_counter]);
+	    }
 	    fclose(pRead);
 	    files_processed++;
 	}
@@ -260,7 +281,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Batch size:\t%d\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
     fprintf(stderr, "Output file:\t%s\n", globalArgs.outFileName);
-    fprintf(stderr, "Output invalid:\t%s\n", globalArgs.outFileNameInvalid);
+    fprintf(stderr, "Output invalid:\t%s\n",
+	    globalArgs.outFileNameInvalid);
     fprintf(stderr, "Host:\t%s\n", globalArgs.host);
     fprintf(stderr, "Port:\t%d\n", globalArgs.port);
     fprintf(stderr, "Collection:\t%s\n", globalArgs.collection);
