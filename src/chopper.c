@@ -64,33 +64,34 @@ void display_usage(void)
     exit(EXIT_FAILURE);
 }
 
-void flush_invalid(char invalid_lines[][MAX_LINE_LENGTH], int flush_size) {
-    printf("\n--- in flush_invalid ---\n");
+//void flush_invalid(char invalid_lines[][MAX_LINE_LENGTH], int flush_size) {
+    //printf("\n--- in flush_invalid ---\n");
     //printf("total_lines_invalid = %d\n", total_lines_invalid);
-    printf("flush_size = %d\n", flush_size);
-    if (globalArgs.outFileNameInvalid)
-    {
-        FILE *pWriteInvalid;
-        pWriteInvalid = fopen(globalArgs.outFileNameInvalid, "a");
-        if (pWriteInvalid != NULL){
-            //int loop_start = total_lines_invalid - (flush_size);
-            int loop_start = 0;
-            printf("loop_start = %d\n", loop_start);
+    //printf("flush_size = %d\n", flush_size);
+//    if (globalArgs.outFileNameInvalid)
+ //   {
+  //      FILE *pWriteInvalid;
+   //     pWriteInvalid = fopen(globalArgs.outFileNameInvalid, "a");
+     //   if (pWriteInvalid != NULL){
+      //      //int loop_start = total_lines_invalid - (flush_size);
+      //      int loop_start = 0;
+            //printf("loop_start = %d\n", loop_start);
             //size_t loop_end = loop_start + flush_size;
             //int loop_end = total_lines_invalid;
-            int loop_end = flush_size;
-            printf("loop_end = %d\n", loop_end);
-            int index;
-            for (index = loop_start; index < flush_size; index++){
+      //      int loop_end = flush_size;
+            //printf("loop_end = %d\n", loop_end);
+      //      int index;
+      //      for (index = loop_start; index < flush_size; index++){
                 //printf("index: %d\n", index);
-                printf("at index %d writing line... %s\n", index, invalid_lines[index]);
-                fputs(invalid_lines[index], pWriteInvalid);
-            }
-        }
-        fclose(pWriteInvalid);
-        printf("closed file for writing\n------------\n");
-    }
-}
+                //printf("at index %d writing line... %s\n", index, invalid_lines[index]);
+      //          fputs(invalid_lines[index], pWriteInvalid);
+      //      }
+      //  }
+      //  fclose(pWriteInvalid);
+      //  printf("closed file for writing\n------------\n");
+   // }
+//}
+
 void call_flush(st_http_request * p, int countval) {
 	if (globalArgs.outFileName != NULL)
 	    flush_to_disk(p, countval);
@@ -99,7 +100,19 @@ void call_flush(st_http_request * p, int countval) {
 	if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
 	    flush_to_stdout(p, countval);
 }
-
+void call_flush_invalid(char **invalid_lines, int countval) {
+    printf("here and countval is: %d\n",countval);
+	if (globalArgs.outFileNameInvalid != NULL){
+        FILE *pWrite;
+        pWrite = fopen(globalArgs.outFileNameInvalid, "a");
+        int flush_count;
+        for (flush_count = 0; flush_count < countval; flush_count++) {
+           printf("index: %d line: %s\n",flush_count, invalid_lines[flush_count]);
+           fprintf(pWrite, "%s\n", invalid_lines[flush_count]);
+        }
+        fclose(pWrite);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -202,18 +215,21 @@ int main(int argc, char *argv[])
     p = (st_http_request *) calloc(use_batch_size,
 				   sizeof(st_http_request));
 
-    int use_invalid_batch_size = 5;
-    int invalid_batch_counter = 0;
+    char **pinvalid_lines;
+    pinvalid_lines = malloc(use_batch_size * sizeof(char*));
+
     int total_lines_invalid = 0;
-    char pinvalid_lines[use_invalid_batch_size][MAX_LINE_LENGTH];
     int total_lines_scanned = 0, files_processed = 0;
     char log_line[MAX_LINE_LENGTH];
 
+    printf("numInputFiles = %d\n", globalArgs.numInputFiles);
     if (globalArgs.numInputFiles > 0) {
 	FILE *pRead;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
+        printf("opening file: %s\n", globalArgs.inputFiles[f_count]);
 	    pRead = fopen(globalArgs.inputFiles[f_count], "r");
 	    int counter = 0;
+        int invalid_batch_counter = 0;
 	    while (fgets(log_line, 8192, pRead) != NULL) {
 		    total_lines_scanned++;
 		    if ((globalArgs.search_string != NULL) && (strstr(log_line, globalArgs.search_string) == NULL)) continue;
@@ -236,44 +252,49 @@ int main(int argc, char *argv[])
             if (num_spaces(p[counter].req_uri) > 0){ valid = 0; }
             if (num_spaces(p[counter].req_proto) > 0){ valid = 0; }
 
-            if(valid == 1){ //valid
+            // if valid, check if it's time to process valid batch
+            if(valid == 1){ //VALID
 		      if ((counter + 1) == use_batch_size) {
 		        call_flush(p, counter + 1);
 		        counter = 0;
               }else{
 		        counter++;
               }
-            }else{ //invalid
+            }else{ // if invalid, check if it's time to process invalid batch
               total_lines_invalid++;
-              invalid_batch_counter++;
-              printf("invalid batch counter = %d\n", invalid_batch_counter);
-              strncpy(pinvalid_lines[invalid_batch_counter-1], log_line, strlen(log_line));
-              printf("---\nAT INVALID LINES BATCH COUNT: %d JUST ADDED: %s\n", invalid_batch_counter, pinvalid_lines[invalid_batch_counter-1]);
-              if(invalid_batch_counter % use_invalid_batch_size == 0) {
-                printf("reached it --- invalid batch size = %d\n", use_invalid_batch_size);
-                printf("invalid batch counter = %d\n", invalid_batch_counter);
-                printf("total invalid lines count = %d\n", total_lines_invalid);
-                flush_invalid(pinvalid_lines, invalid_batch_counter-1);
-                invalid_batch_counter = 0;
-              }
-              printf("invalid_batch_counter after processing invalid line: %d\n", invalid_batch_counter);
-            }
+              pinvalid_lines[invalid_batch_counter] = malloc(strlen(log_line)+1 * (sizeof(char)));
+              strcpy(pinvalid_lines[invalid_batch_counter], log_line);
+              printf("line: %s\n", pinvalid_lines[invalid_batch_counter]);
 
-           //END
+		      if ((invalid_batch_counter + 1) == use_batch_size) {
+		        call_flush_invalid(pinvalid_lines, invalid_batch_counter + 1);
+                int reset_counter;
+                for(reset_counter = 0; reset_counter < invalid_batch_counter; reset_counter++){
+                    free(pinvalid_lines[reset_counter]);
+                }
+                invalid_batch_counter = 0;
+              }else{
+		        invalid_batch_counter++;
+              }
+
+            }
 	    }
         // call if counter > 0?
         printf("outputting final invalid with %d\n", invalid_batch_counter);
-        if(invalid_batch_counter > 0) { flush_invalid(pinvalid_lines, invalid_batch_counter-1);}
 	    call_flush(p, counter);
+        printf("final invalid_batch_counter = %d\n",invalid_batch_counter);
+		call_flush_invalid(pinvalid_lines, invalid_batch_counter);
+        int reset_counter;
+        for(reset_counter = 0; reset_counter < invalid_batch_counter; reset_counter++){
+            free(pinvalid_lines[reset_counter]);
+        }
 	    fclose(pRead);
 	    files_processed++;
 	}
 
     }
-    printf("calling final process invalid.\n");
-    //process_invalid(invalidLines, NULL,1);
-    //flush remaining invalid
     free(p);
+    free(pinvalid_lines);
     //free(invalidLines);
     //invalidLines = 0;
     end = clock();
