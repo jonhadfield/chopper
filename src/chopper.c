@@ -43,7 +43,7 @@ const char chopper_usage_string[] =
     "           [-v|--verbose] [-h|--help]\n"
     "           <command> [<args>]";
 
-static const char *optString = "o:t:b:h:p:c:s:O:v?";
+static const char *optString = "o:t:f:b:h:p:c:s:O:v?";
 
 static const struct option longOpts[] = {
     {"outFileName", required_argument, NULL, 'o'},
