@@ -11,6 +11,7 @@
  * *
  * * -o outfile name - write to file rather than stdout
  * * -t output type
+ * * -f output fields 
  * * -b batch size - number of lines to process before flushing - debug only
  * * -h db host
  * * -p port of db server
@@ -25,6 +26,7 @@
  * *
  * * --outfile
  * * --type
+ * * --fields
  * * --batchsize
  * * --host
  * * --port
@@ -36,7 +38,7 @@
  * */
 
 const char chopper_usage_string[] =
-    "chopper [-s|--search_string] [-o|--outfile <path>] [-t|--type] [-b|--batchsize <value>] [-h|--host <value>]\n"
+    "chopper [-s|--search_string] [-o|--outfile <path>] [-t|--type] [-f|--fields] [-b|--batchsize <value>] [-h|--host <value>]\n"
     "           [-p|--port <value>] [-c|--collection <db.collection>] [-s|--search_string <value>] [-O|--outfile-invalid] [-v|--verbose]\n"
     "           [-v|--verbose] [-h|--help]\n"
     "           <command> [<args>]";
@@ -46,6 +48,7 @@ static const char *optString = "o:t:b:h:p:c:s:O:v?";
 static const struct option longOpts[] = {
     {"outFileName", required_argument, NULL, 'o'},
     {"type", required_argument, NULL, 't'},
+    {"fields", required_argument, NULL, 'f'},
     {"batch_size", required_argument, NULL, 'b'},
     {"host", required_argument, NULL, 'h'},
     {"port", required_argument, NULL, 'p'},
@@ -79,6 +82,7 @@ int main(int argc, char *argv[])
     globalArgs.outFileNameInvalid = NULL;
     globalArgs.outFile = NULL;
     globalArgs.type = NULL;
+    globalArgs.fields = NULL;
     globalArgs.batch_size = NULL;
     globalArgs.host = NULL;
     globalArgs.port = 27017;
@@ -96,6 +100,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 't':
 	    globalArgs.type = optarg;
+	    break;
+	case 'f':
+	    globalArgs.fields = optarg;
 	    break;
 	case 'b':
 	    globalArgs.batch_size = optarg;

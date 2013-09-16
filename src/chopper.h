@@ -31,6 +31,7 @@ struct globalArgs_t {
     const char *outFileName;	/* -o option */
     FILE *outFile;
     char *type;			/* -t option */
+    char *fields;		/* -f option */
     char *batch_size;		/* -b option */
     char *host;			/* -h option */
     int port;			/* -p option */
