@@ -143,15 +143,31 @@ int flush_to_mongo(st_http_request * p, int counter)
 
 int flush_to_stdout(st_http_request * p, int counter)
 {
+    char *fields = globalArgs.fields;
     int flush_count;
     for (flush_count = 0; flush_count < counter; flush_count++) {
-	printf("%s %s %s [%s] \"%s %s %s\" %d %s \"%s\" \"%s\"\n",
+        if (fields == NULL) {
+	    printf("%s %s %s [%s] \"%s %s %s\" %d %s \"%s\" \"%s\"\n",
 	       p[flush_count].req_ip, p[flush_count].req_ident,
 	       p[flush_count].req_user, p[flush_count].req_datetime,
 	       p[flush_count].req_method, p[flush_count].req_uri,
 	       p[flush_count].req_proto, p[flush_count].resp_code,
 	       p[flush_count].resp_bytes, p[flush_count].req_referer,
 	       p[flush_count].req_agent);
+        }else{
+           if(strstr(fields, "req_ip") != NULL) printf("%s ",p[flush_count].req_ip);
+           if(strstr(fields, "req_ident") != NULL) printf("%s ",p[flush_count].req_ident);
+           if(strstr(fields, "req_user") != NULL) printf("%s ",p[flush_count].req_user);
+           if(strstr(fields, "req_datetime") != NULL) printf("[%s] ",p[flush_count].req_datetime);
+           if(strstr(fields, "req_method") != NULL) printf("%s ",p[flush_count].req_method);
+           if(strstr(fields, "req_uri") != NULL) printf("%s ",p[flush_count].req_uri);
+           if(strstr(fields, "req_proto") != NULL) printf("%s ",p[flush_count].req_proto);
+           if(strstr(fields, "resp_code") != NULL) printf("%d ",p[flush_count].resp_code);
+           if(strstr(fields, "resp_bytes") != NULL) printf("%s ",p[flush_count].resp_bytes);
+           if(strstr(fields, "req_referer") != NULL) printf("%s ",p[flush_count].req_referer);
+           if(strstr(fields, "req_agent") != NULL) printf("%s ",p[flush_count].req_agent);
+           printf("\n");
+        }
     }
     return (0);
 }
