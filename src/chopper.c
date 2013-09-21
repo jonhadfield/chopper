@@ -9,7 +9,6 @@
 
 /* short options:
  * *
- * * -o outfile name - write to file rather than stdout
  * * -t output type
  * * -f output fields 
  * * -b batch size - number of lines to process before flushing - debug only
@@ -24,7 +23,6 @@
  * *
  * * long options:
  * *
- * * --outfile
  * * --type
  * * --fields
  * * --batchsize
@@ -38,15 +36,14 @@
  * */
 
 const char chopper_usage_string[] =
-    "chopper [-s|--search_string] [-o|--outfile <path>] [-t|--type] [-f|--fields] [-b|--batchsize <value>] [-h|--host <value>]\n"
+    "chopper [-s|--search_string] [-t|--type] [-f|--fields] [-b|--batchsize <value>] [-h|--host <value>]\n"
     "           [-p|--port <value>] [-c|--collection <db.collection>] [-s|--search_string <value>] [-O|--outfile-invalid] [-v|--verbose]\n"
     "           [-v|--verbose] [-h|--help]\n"
     "           <command> [<args>]";
 
-static const char *optString = "o:t:f:b:h:p:c:s:O:v?";
+static const char *optString = "t:f:b:h:p:c:s:O:v?";
 
 static const struct option longOpts[] = {
-    {"outFileName", required_argument, NULL, 'o'},
     {"type", required_argument, NULL, 't'},
     {"fields", required_argument, NULL, 'f'},
     {"batch_size", required_argument, NULL, 'b'},
@@ -78,9 +75,7 @@ int main(int argc, char *argv[])
 {
     int opt = 0;
     int longIndex = 0;
-    globalArgs.outFileName = NULL;
     globalArgs.outFileNameInvalid = NULL;
-    globalArgs.outFile = NULL;
     globalArgs.type = NULL;
     globalArgs.fields = NULL;
     globalArgs.batch_size = NULL;
@@ -96,9 +91,6 @@ int main(int argc, char *argv[])
     opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
     while (opt != -1) {
 	switch (opt) {
-	case 'o':
-	    globalArgs.outFileName = optarg;
-	    break;
 	case 't':
 	    globalArgs.type = optarg;
 	    break;
@@ -267,7 +259,6 @@ int main(int argc, char *argv[])
     fprintf(stderr, "   invalid:\t%zu\n", total_lines_invalid);
     fprintf(stderr, "Batch size:\t%zu\n", use_batch_size);
     fprintf(stderr, "Search string:\t%s\n", globalArgs.search_string);
-    fprintf(stderr, "Output file:\t%s\n", globalArgs.outFileName);
     fprintf(stderr, "Output invalid:\t%s\n",
 	    globalArgs.outFileNameInvalid);
     fprintf(stderr, "Host:\t%s\n", globalArgs.host);

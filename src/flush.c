@@ -6,12 +6,11 @@
 
 void flush_valid(st_http_request * scanned_lines, int countval)
 {
-    if (globalArgs.outFileName != NULL)
-	flush_to_disk(scanned_lines, countval);
-    if (globalArgs.host != NULL && globalArgs.collection != NULL)
-	flush_to_mongo(scanned_lines, countval);
-    if (globalArgs.outFileName == NULL && globalArgs.host == NULL)
-	flush_to_stdout(scanned_lines, countval);
+    if (globalArgs.host != NULL && globalArgs.collection != NULL) { 
+        flush_to_mongo(scanned_lines, countval);
+    }else{
+	    flush_to_stdout(scanned_lines, countval);
+    }
 }
 
 void flush_invalid(char **invalid_lines, int countval)
@@ -25,87 +24,6 @@ void flush_invalid(char **invalid_lines, int countval)
 	}
 	fclose(pWrite);
     }
-}
-
-int flush_to_disk(st_http_request * p, int counter)
-{
-    FILE *pWrite;
-    pWrite = fopen(globalArgs.outFileName, "a+");
-    int flush_count;
-    char *fields = globalArgs.fields;
-    char line[MAX_LINE_LENGTH];
-    char req_ip[MAX_IP];
-    char req_ident[MAX_IDENT];
-    char req_user[MAX_USER];
-    char req_datetime[MAX_DATETIME];
-    char req_method[MAX_METHOD];
-    char req_uri[MAX_URI];
-    char req_proto[MAX_PROTO];
-    char resp_code[4];
-    char resp_bytes[20];
-    char req_referer[MAX_REFERER];
-    char req_agent[MAX_AGENT];
-    for (flush_count = 0; flush_count < counter; flush_count++) {
-    memset(line,'\0',sizeof(line));
-	if (fields == NULL || strstr(fields, "req_ip") != NULL) {
-	    sprintf(req_ip, "%s", p[flush_count].req_ip);
-        strcat(line, req_ip);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_ident") != NULL) {
-	    sprintf(req_ident,"%s", p[flush_count].req_ident);
-        strcat(line, req_ident);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_user") != NULL) {
-	    sprintf(req_user, "%s", p[flush_count].req_user);
-        strcat(line, req_user);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_datetime") != NULL) {
-	    sprintf(req_datetime, "%s", p[flush_count].req_datetime);
-        strcat(line, req_datetime);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_method") != NULL) {
-	    sprintf(req_method, "%s", p[flush_count].req_method);
-        strcat(line, req_method);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_uri") != NULL) {
-	    sprintf(req_uri, "%s", p[flush_count].req_uri);
-        strcat(line, req_uri);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_proto") != NULL) {
-	    sprintf(req_proto, "%s", p[flush_count].req_proto);
-        strcat(line, req_proto);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "resp_code") != NULL) {
-	    sprintf(resp_code, "%d", p[flush_count].resp_code);
-        strcat(line, resp_code);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "resp_bytes") != NULL) {
-	    sprintf(resp_bytes, "%s", p[flush_count].resp_bytes);
-        strcat(line, resp_bytes);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_referer") != NULL) {
-	    sprintf(req_referer, "%s", p[flush_count].req_referer);
-        strcat(line, req_referer);
-        strcat(line, " ");
-	}
-	if (fields == NULL || strstr(fields, "req_agent") != NULL) {
-	    sprintf(req_agent, "%s", p[flush_count].req_agent);
-        strcat(line, req_agent);
-        strcat(line, " ");
-	}
-	fprintf(pWrite, "%s\n", line);
-    }
-    fclose(pWrite);
-    return (0);
 }
 
 int flush_to_mongo(st_http_request * p, int counter)

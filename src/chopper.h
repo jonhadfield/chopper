@@ -28,8 +28,6 @@ typedef struct {
 } st_http_request;
 
 struct globalArgs_t {
-    const char *outFileName;	/* -o option */
-    FILE *outFile;
     char *type;			/* -t option */
     char *fields;		/* -f option */
     char *batch_size;		/* -b option */
@@ -47,7 +45,6 @@ void flush_valid(st_http_request *, int);
 void flush_invalid(char **, int);
 _Bool is_scanned_line_valid(st_http_request);
 _Bool is_unscanned_line_valid(char *);
-int flush_to_disk(st_http_request *, int);
 int flush_to_mongo(st_http_request *, int);
 int flush_to_stdout(st_http_request *, int);
 int chop();
