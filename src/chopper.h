@@ -5,7 +5,7 @@
 #define  MAX_DATETIME         27
 #define  MAX_METHOD            8
 #define  MAX_URI            2038	//Safe limit?
-#define  MAX_PROTO             8
+#define  MAX_PROTO             9
 #define  MAX_RESP_BYTES       20
 #define  MAX_REFERER        2038	//Safe limit?
 #define  MAX_AGENT          1024	//Safe limit?
