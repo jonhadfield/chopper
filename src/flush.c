@@ -235,19 +235,19 @@ int flush_to_stdout(st_http_request * p, int counter)
 	if (fields == NULL || strstr(fields, "req_datetime") != NULL)
 	    printf("[%s] ", p[flush_count].req_datetime);
 	if (fields == NULL || strstr(fields, "req_method") != NULL)
-	    printf("%s ", p[flush_count].req_method);
+	    printf("\"%s ", p[flush_count].req_method);
 	if (fields == NULL || strstr(fields, "req_uri") != NULL)
 	    printf("%s ", p[flush_count].req_uri);
 	if (fields == NULL || strstr(fields, "req_proto") != NULL)
-	    printf("%s ", p[flush_count].req_proto);
+	    printf("%s\" ", p[flush_count].req_proto);
 	if (fields == NULL || strstr(fields, "resp_code") != NULL)
 	    printf("%d ", p[flush_count].resp_code);
 	if (fields == NULL || strstr(fields, "resp_bytes") != NULL)
 	    printf("%s ", p[flush_count].resp_bytes);
 	if (fields == NULL || strstr(fields, "req_referer") != NULL)
-	    printf("%s ", p[flush_count].req_referer);
+	    printf("\"%s\" ", p[flush_count].req_referer);
 	if (fields == NULL || strstr(fields, "req_agent") != NULL)
-	    printf("%s", p[flush_count].req_agent);
+	    printf("\"%s\"", p[flush_count].req_agent);
 	printf("\n");
     }
     return (0);
