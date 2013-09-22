@@ -1,6 +1,7 @@
 Process common and combined formatted logs
 * Output to stdout or mongodb
-* Filter invalid log entries
+* Select fields to output
+* Filter invalid entries
 * Basic search
 
 __Usage__
