@@ -36,10 +36,10 @@
  * */
 
 const char chopper_usage_string[] =
-    "chopper [-s|--search_string] [-t|--type] [-f|--fields] [-b|--batchsize <value>] [-h|--host <value>]\n"
-    "           [-p|--port <value>] [-c|--collection <db.collection>] [-s|--search_string <value>] [-O|--outfile-invalid] [-v|--verbose]\n"
-    "           [-v|--verbose] [-h|--help]\n"
-    "           <command> [<args>]";
+    "chopper [-s|--search_string] [-f|--fields] [-b|--batchsize <value>] [-h|--host <value>]\n"
+    "        [-p|--port <value>] [-c|--collection <db.collection>] [-s|--search_string <value>]\n"
+    "        [-O|--outfile-invalid] [-v|--verbose] [-h|--help]\n"
+    "        <command> [<args>]";
 
 static const char *optString = "t:f:b:h:p:c:s:O:v?";
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
 	FILE *input_file;
 	size_t invalid_batch_counter = 0;
 	for (f_count = 0; f_count < globalArgs.numInputFiles; f_count++) {
-	    printf("Processing file [%zu/%d]: %s\n",
+	    fprintf(stderr, "Processing file [%zu/%d]: %s\n",
 		   f_count + 1, globalArgs.numInputFiles,
 		   globalArgs.inputFiles[f_count]);
 	    input_file = fopen(globalArgs.inputFiles[f_count], "r");
