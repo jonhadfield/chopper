@@ -6,10 +6,10 @@
 
 void flush_valid(st_http_request * scanned_lines, int countval)
 {
-    if (globalArgs.host != NULL && globalArgs.collection != NULL) { 
-        flush_to_mongo(scanned_lines, countval);
-    }else{
-	    flush_to_stdout(scanned_lines, countval);
+    if (globalArgs.host != NULL && globalArgs.collection != NULL) {
+	flush_to_mongo(scanned_lines, countval);
+    } else {
+	flush_to_stdout(scanned_lines, countval);
     }
 }
 

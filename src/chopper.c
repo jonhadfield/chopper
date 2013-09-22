@@ -87,7 +87,8 @@ int main(int argc, char *argv[])
     globalArgs.inputFiles = NULL;
     globalArgs.numInputFiles = 0;
 
-    if(argc == 1) display_usage();
+    if (argc == 1)
+	display_usage();
     opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
     while (opt != -1) {
 	switch (opt) {
